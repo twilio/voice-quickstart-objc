@@ -1,0 +1,6 @@
+Pods/
+Podfile.lock
+ObjCVoiceQuickstart.xcworkspace
+
+xcuserdata/
+*.xcuserstate
