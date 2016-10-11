@@ -74,9 +74,9 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
         self.deviceTokenString = [credentials.token description];
         NSString *accessToken = [self fetchAccessToken];
 
-        [[VoiceClient sharedInstance] register:accessToken
-                                   deviceToken:self.deviceTokenString
-                                    completion:^(NSError *error) {
+        [[VoiceClient sharedInstance] registerWithAccessToken:accessToken
+                                                  deviceToken:self.deviceTokenString
+                                                   completion:^(NSError *error) {
              if (error) {
                  NSLog(@"An error occurred while registering: %@", [error localizedDescription]);
              }
@@ -93,9 +93,9 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     if ([type isEqualToString:PKPushTypeVoIP]) {
         NSString *accessToken = [self fetchAccessToken];
 
-        [[VoiceClient sharedInstance] unregister:accessToken
-                                     deviceToken:self.deviceTokenString
-                                      completion:^(NSError * _Nullable error) {
+        [[VoiceClient sharedInstance] unregisterWithAccessToken:accessToken
+                                                    deviceToken:self.deviceTokenString
+                                                     completion:^(NSError * _Nullable error) {
             if (error) {
                 NSLog(@"An error occurred while unregistering: %@", [error localizedDescription]);
             }
