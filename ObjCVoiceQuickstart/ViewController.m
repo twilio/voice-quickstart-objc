@@ -11,7 +11,7 @@
 @import PushKit;
 @import TwilioVoiceClient;
 
-static NSString *const kYourServerBaseURLString = @"https://c9a6fc46.ngrok.io";
+static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 @interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOIncomingCallDelegate, TVOOutgoingCallDelegate>
