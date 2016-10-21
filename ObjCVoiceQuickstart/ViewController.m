@@ -57,6 +57,11 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     self.outgoingCall = [[VoiceClient sharedInstance] call:[self fetchAccessToken]
                                                     params:@{}
                                                   delegate:self];
+    
+    if (!self.outgoingCall) {
+        NSLog(@"Failed to start outgoing call");
+        return;
+    }
 
     [self toggleUIState:NO];
     [self startSpin];
@@ -119,6 +124,14 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 #pragma mark - TVONotificationDelegate
 - (void)incomingCallReceived:(TVOIncomingCall *)incomingCall {
     NSLog(@"incomingCallReceived:");
+    
+    if (self.incomingCall || self.outgoingCall) {
+        NSLog(@"Already an active call. Ignoring incoming call from %@", incomingCall.from);
+        return;
+    }
+    
+    self.incomingCall = incomingCall;
+    self.incomingCall.delegate = self;
 
     NSString *from = incomingCall.from;
     NSString *alertMessage = [NSString stringWithFormat:@"From %@", from];
@@ -168,6 +181,11 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 - (void)incomingCallCancelled:(TVOIncomingCall *)incomingCall {
     NSLog(@"incomingCallCancelled:");
+    
+    if (![incomingCall.callSid isEqualToString:self.incomingCall.callSid]) {
+        NSLog(@"Incoming (but not current) call from \"%@\" cancelled. Just ignore it.", incomingCall.from);
+        return;
+    }
 
     if (self.incomingAlertController) {
         typeof(self) __weak weakSelf = self;
@@ -178,6 +196,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
             [strongSelf toggleUIState:YES];
         }];
     }
+    
+    self.incomingCall = nil;
 
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
 }
@@ -187,10 +207,6 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 }
 
 #pragma mark - TVOIncomingCallDelegate
-- (void)incomingCallIsConnecting:(TVOIncomingCall *)incomingCall {
-    NSLog(@"incomingCallIsConnecting:");
-}
-
 - (void)incomingCallDidConnect:(TVOIncomingCall *)incomingCall {
     NSLog(@"incomingCallDidConnect:");
 
@@ -216,12 +232,10 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 }
 
 #pragma mark - TVOOutgoingCallDelegate
-- (void)outgoingCallIsConnecting:(TVOOutgoingCall *)outgoingCall {
-    NSLog(@"outgoingCallIsConnecting:");
-}
-
 - (void)outgoingCallDidConnect:(TVOOutgoingCall *)outgoingCall {
     NSLog(@"outgoingCallDidConnect:");
+    
+    self.outgoingCall = outgoingCall;
 
     [self toggleUIState:NO];
     [self stopSpin];
