@@ -4,5 +4,5 @@ source 'https://github.com/CocoaPods/Specs.git'
 target 'ObjCVoiceQuickstart' do
   use_frameworks!
 
-  pod 'TwilioVoiceClient', '=2.0.0-beta4'
+  pod 'TwilioVoiceClient', '=2.0.0-beta5'
 end
