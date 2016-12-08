@@ -14,7 +14,7 @@
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
-@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOIncomingCallDelegate, TVOOutgoingCallDelegate>
+@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOIncomingCallDelegate, TVOOutgoingCallDelegate, AVAudioPlayerDelegate>
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
@@ -26,6 +26,11 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 @property (nonatomic, weak) IBOutlet UIButton *placeCallButton;
 @property (nonatomic, strong) UIAlertController* incomingAlertController;
+
+@property (nonatomic, strong) AVAudioPlayer *ringtonePlayer;
+typedef void (^RingtonePlaybackCallback)(void);
+@property (nonatomic, strong) RingtonePlaybackCallback ringtonePlaybackCallback;
+
 @end
 
 @implementation ViewController
@@ -54,14 +59,18 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 }
 
 - (IBAction)placeCall:(id)sender {
-    self.outgoingCall = [[VoiceClient sharedInstance] call:[self fetchAccessToken]
-                                                    params:@{}
-                                                  delegate:self];
+    __weak typeof(self) weakSelf = self;
+    [self playOutgoingRingtone:^{
+        __strong typeof(self) strongSelf = weakSelf;
+        strongSelf.outgoingCall = [[VoiceClient sharedInstance] call:[strongSelf fetchAccessToken]
+                                                              params:@{}
+                                                            delegate:strongSelf];
     
-    if (!self.outgoingCall) {
-        NSLog(@"Failed to start outgoing call");
-        return;
-    }
+        if (!strongSelf.outgoingCall) {
+            NSLog(@"Failed to start outgoing call");
+            return;
+        }
+    }];
 
     [self toggleUIState:NO];
     [self startSpin];
@@ -135,13 +144,17 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
     NSString *from = incomingCall.from;
     NSString *alertMessage = [NSString stringWithFormat:@"From %@", from];
+    
+    [self playIncomingRingtone];
 
     self.incomingAlertController = [UIAlertController alertControllerWithTitle:@"Incoming" message:alertMessage preferredStyle:UIAlertControllerStyleAlert];
 
     typeof(self) __weak weakSelf = self;
 
     UIAlertAction *reject = [UIAlertAction actionWithTitle:@"Reject" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-        [incomingCall reject];
+        [self stopIncomingRingtone:^{
+            [incomingCall reject];
+        }];
 
         typeof(self) __strong strongSelf = weakSelf;
         strongSelf.incomingAlertController = nil;
@@ -151,6 +164,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
     UIAlertAction *ignore = [UIAlertAction actionWithTitle:@"Ignore" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         [incomingCall ignore];
+        
+        [self stopIncomingRingtone:nil];
 
         typeof(self) __strong strongSelf = weakSelf;
         strongSelf.incomingAlertController = nil;
@@ -160,7 +175,10 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
     UIAlertAction *accept = [UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         typeof(self) __strong strongSelf = weakSelf;
-        [incomingCall acceptWithDelegate:strongSelf];
+        [self stopIncomingRingtone:^{
+            [incomingCall acceptWithDelegate:strongSelf];
+        }];
+
         strongSelf.incomingAlertController = nil;
         [strongSelf startSpin];
     }];
@@ -186,6 +204,9 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
         NSLog(@"Incoming (but not current) call from \"%@\" cancelled. Just ignore it.", incomingCall.from);
         return;
     }
+    
+    [self stopIncomingRingtone:nil];
+    [self playDisconnectSound];
 
     if (self.incomingAlertController) {
         typeof(self) __weak weakSelf = self;
@@ -218,6 +239,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 - (void)incomingCallDidDisconnect:(TVOIncomingCall *)incomingCall {
     NSLog(@"incomingCallDidDisconnect:");
+    
+    [self playDisconnectSound];
 
     self.incomingCall = nil;
     [self toggleUIState:YES];
@@ -244,6 +267,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 - (void)outgoingCallDidDisconnect:(TVOOutgoingCall *)outgoingCall {
     NSLog(@"outgoingCallDidDisconnect:");
+    
+    [self playDisconnectSound];
 
     self.outgoingCall = nil;
     [self toggleUIState:YES];
@@ -264,6 +289,75 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
                                           withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker
                                                 error:&error]) {
         NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+    }
+}
+
+#pragma mark - Ringtone player & AVAudioPlayerDelegate
+- (void)playOutgoingRingtone:(RingtonePlaybackCallback)completion {
+    self.ringtonePlaybackCallback = completion;
+    
+    NSString *ringtonePath = [[NSBundle mainBundle] pathForResource:@"outgoing" ofType:@"wav"];
+    if ([ringtonePath length] <= 0) {
+        NSLog(@"Can't find outgoing sound file");
+        if (self.ringtonePlaybackCallback) {
+            self.ringtonePlaybackCallback();
+        }
+        return;
+    }
+    
+    self.ringtonePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:ringtonePath] error:nil];
+    self.ringtonePlayer.delegate = self;
+    [self.ringtonePlayer play];
+}
+
+- (void)playIncomingRingtone {
+    NSString *ringtonePath = [[NSBundle mainBundle] pathForResource:@"incoming" ofType:@"wav"];
+    if ([ringtonePath length] <= 0) {
+        NSLog(@"Can't find incoming sound file");
+        return;
+    }
+    
+    self.ringtonePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:ringtonePath] error:nil];
+    self.ringtonePlayer.delegate = self;
+    self.ringtonePlayer.numberOfLoops = -1;
+    
+    [self.ringtonePlayer play];
+}
+
+- (void)stopIncomingRingtone:(RingtonePlaybackCallback)completion {
+    if (!self.ringtonePlayer.isPlaying) {
+        if (completion) {
+            completion();
+        }
+        return;
+    }
+    
+    self.ringtonePlayer.delegate = self;
+    self.ringtonePlaybackCallback = completion;
+    self.ringtonePlayer.numberOfLoops = 1;
+}
+
+- (void)playDisconnectSound {
+    NSString *ringtonePath = [[NSBundle mainBundle] pathForResource:@"disconnect" ofType:@"wav"];
+    if ([ringtonePath length] <= 0) {
+        NSLog(@"Can't find disconnect sound file");
+        return;
+    }
+    
+    self.ringtonePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:ringtonePath] error:nil];
+    self.ringtonePlayer.delegate = self;
+    self.ringtonePlaybackCallback = nil;
+    
+    [self.ringtonePlayer play];
+}
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
+    if (self.ringtonePlaybackCallback) {
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(self) strongSelf = weakSelf;
+            strongSelf.ringtonePlaybackCallback();
+        });
     }
 }
 
