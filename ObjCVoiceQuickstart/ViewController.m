@@ -307,7 +307,8 @@ typedef void (^RingtonePlaybackCallback)(void);
     
     self.ringtonePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:ringtonePath] error:nil];
     self.ringtonePlayer.delegate = self;
-    [self.ringtonePlayer play];
+    
+    [self playRingtone];
 }
 
 - (void)playIncomingRingtone {
@@ -321,7 +322,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     self.ringtonePlayer.delegate = self;
     self.ringtonePlayer.numberOfLoops = -1;
     
-    [self.ringtonePlayer play];
+    [self playRingtone];
 }
 
 - (void)stopIncomingRingtone:(RingtonePlaybackCallback)completion {
@@ -348,6 +349,18 @@ typedef void (^RingtonePlaybackCallback)(void);
     self.ringtonePlayer.delegate = self;
     self.ringtonePlaybackCallback = nil;
     
+    [self playRingtone];
+}
+
+- (void)playRingtone {
+    NSError *error = nil;
+    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback
+                                          withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker
+                                                error:&error]) {
+        NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+    }
+    
+    self.ringtonePlayer.volume = 1.0f;
     [self.ringtonePlayer play];
 }
 
@@ -358,6 +371,13 @@ typedef void (^RingtonePlaybackCallback)(void);
             __strong typeof(self) strongSelf = weakSelf;
             strongSelf.ringtonePlaybackCallback();
         });
+        
+        NSError *error = nil;
+        if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
+                                              withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker
+                                                    error:&error]) {
+            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+        }
     }
 }
 
