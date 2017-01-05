@@ -285,9 +285,8 @@ typedef void (^RingtonePlaybackCallback)(void);
 #pragma mark - AVAudioSession
 - (void)routeAudioToSpeaker {
     NSError * error;
-    [[AVAudioSession sharedInstance] overrideOutputAudioPort:kAudioSessionOverrideAudioRoute_Speaker
-                                                       error:&error];
-    if (error) {
+    if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:kAudioSessionOverrideAudioRoute_Speaker
+                                                            error:&error]) {
         NSLog(@"Failed to route audio to speaker: %@", [error localizedDescription]);
     }
 }
