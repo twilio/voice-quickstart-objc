@@ -284,11 +284,11 @@ typedef void (^RingtonePlaybackCallback)(void);
 
 #pragma mark - AVAudioSession
 - (void)routeAudioToSpeaker {
-    NSError *error = nil;
-    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
-                                          withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker
-                                                error:&error]) {
-        NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+    NSError * error;
+    [[AVAudioSession sharedInstance] overrideOutputAudioPort:kAudioSessionOverrideAudioRoute_Speaker
+                                                       error:&error];
+    if (error) {
+        NSLog(@"Failed to route audio to speaker: %@", [error localizedDescription]);
     }
 }
 
@@ -355,10 +355,11 @@ typedef void (^RingtonePlaybackCallback)(void);
 - (void)playRingtone {
     NSError *error = nil;
     if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback
-                                          withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker
                                                 error:&error]) {
         NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
     }
+    
+    [self routeAudioToSpeaker];
     
     self.ringtonePlayer.volume = 1.0f;
     [self.ringtonePlayer play];
@@ -374,7 +375,6 @@ typedef void (^RingtonePlaybackCallback)(void);
         
         NSError *error = nil;
         if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
-                                              withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker
                                                     error:&error]) {
             NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
         }
