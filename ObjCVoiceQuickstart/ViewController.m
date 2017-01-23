@@ -14,12 +14,12 @@
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
-@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOIncomingCallDelegate, TVOOutgoingCallDelegate, AVAudioPlayerDelegate>
+@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, AVAudioPlayerDelegate>
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
-@property (nonatomic, strong) TVOIncomingCall *incomingCall;
-@property (nonatomic, strong) TVOOutgoingCall *outgoingCall;
+@property (nonatomic, strong) TVOCallInvite *callInvite;
+@property (nonatomic, strong) TVOCall *call;
 
 @property (nonatomic, weak) IBOutlet UIImageView *iconView;
 @property (nonatomic, assign, getter=isSpinning) BOOL spinning;
@@ -37,6 +37,8 @@ typedef void (^RingtonePlaybackCallback)(void);
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    [[VoiceClient sharedInstance] setLogLevel:TVOLogLevelVerbose];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
@@ -59,21 +61,26 @@ typedef void (^RingtonePlaybackCallback)(void);
 }
 
 - (IBAction)placeCall:(id)sender {
-    __weak typeof(self) weakSelf = self;
-    [self playOutgoingRingtone:^{
-        __strong typeof(self) strongSelf = weakSelf;
-        strongSelf.outgoingCall = [[VoiceClient sharedInstance] call:[strongSelf fetchAccessToken]
-                                                              params:@{}
-                                                            delegate:strongSelf];
-    
-        if (!strongSelf.outgoingCall) {
-            NSLog(@"Failed to start outgoing call");
-            return;
-        }
-    }];
-
-    [self toggleUIState:NO];
-    [self startSpin];
+    if (self.call) {
+        [self.call disconnect];
+        [self toggleUIState:NO];
+    } else {
+        __weak typeof(self) weakSelf = self;
+        [self playOutgoingRingtone:^{
+            __strong typeof(self) strongSelf = weakSelf;
+            strongSelf.call = [[VoiceClient sharedInstance] call:[strongSelf fetchAccessToken]
+                                                          params:@{}
+                                                        delegate:strongSelf];
+            
+            if (!strongSelf.call) {
+                NSLog(@"Failed to start outgoing call");
+                return;
+            }
+        }];
+        
+        [self toggleUIState:NO];
+        [self startSpin];
+    }
 }
 
 - (void)toggleUIState:(BOOL)isEnabled {
@@ -131,18 +138,17 @@ typedef void (^RingtonePlaybackCallback)(void);
 }
 
 #pragma mark - TVONotificationDelegate
-- (void)incomingCallReceived:(TVOIncomingCall *)incomingCall {
-    NSLog(@"incomingCallReceived:");
+- (void)callInviteReceived:(TVOCallInvite *)callInvite {
+    NSLog(@"callInviteReceived:");
     
-    if (self.incomingCall || self.outgoingCall) {
-        NSLog(@"Already an active call. Ignoring incoming call from %@", incomingCall.from);
+    if (self.call && self.call.state == TVOCallStateConnected) {
+        NSLog(@"Already an active call. Ignoring incoming call invite from %@", callInvite.from);
         return;
     }
     
-    self.incomingCall = incomingCall;
-    self.incomingCall.delegate = self;
+    self.callInvite = callInvite;
 
-    NSString *from = incomingCall.from;
+    NSString *from = callInvite.from;
     NSString *alertMessage = [NSString stringWithFormat:@"From %@", from];
     
     [self playIncomingRingtone];
@@ -153,7 +159,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 
     UIAlertAction *reject = [UIAlertAction actionWithTitle:@"Reject" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         [self stopIncomingRingtone:^{
-            [incomingCall reject];
+            [callInvite reject];
         }];
 
         typeof(self) __strong strongSelf = weakSelf;
@@ -163,7 +169,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     [self.incomingAlertController addAction:reject];
 
     UIAlertAction *ignore = [UIAlertAction actionWithTitle:@"Ignore" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-        [incomingCall ignore];
+        /* To ignore the call invite, you don't have to do anything but just literally ignore it */
         
         [self stopIncomingRingtone:nil];
 
@@ -176,7 +182,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     UIAlertAction *accept = [UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         typeof(self) __strong strongSelf = weakSelf;
         [self stopIncomingRingtone:^{
-            [incomingCall acceptWithDelegate:strongSelf];
+            [callInvite acceptWithDelegate:strongSelf];
         }];
 
         strongSelf.incomingAlertController = nil;
@@ -191,17 +197,17 @@ typedef void (^RingtonePlaybackCallback)(void);
     if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateActive) {
         UIApplication* app = [UIApplication sharedApplication];
         UILocalNotification* notification = [[UILocalNotification alloc] init];
-        notification.alertBody = [NSString stringWithFormat:@"Incoming Call from %@", incomingCall.from];
+        notification.alertBody = [NSString stringWithFormat:@"Incoming Call from %@", callInvite.from];
 
         [app presentLocalNotificationNow:notification];
     }
 }
 
-- (void)incomingCallCancelled:(TVOIncomingCall *)incomingCall {
-    NSLog(@"incomingCallCancelled:");
+- (void)callInviteCancelled:(TVOCallInvite *)callInvite {
+    NSLog(@"callInviteCancelled:");
     
-    if (![incomingCall.callSid isEqualToString:self.incomingCall.callSid]) {
-        NSLog(@"Incoming (but not current) call from \"%@\" cancelled. Just ignore it.", incomingCall.from);
+    if (![callInvite.callSid isEqualToString:self.callInvite.callSid]) {
+        NSLog(@"Incoming (but not current) call invite from \"%@\" cancelled. Just ignore it.", callInvite.from);
         return;
     }
     
@@ -218,7 +224,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         }];
     }
     
-    self.incomingCall = nil;
+    self.callInvite = nil;
 
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
 }
@@ -227,57 +233,35 @@ typedef void (^RingtonePlaybackCallback)(void);
     NSLog(@"notificationError: %@", [error localizedDescription]);
 }
 
-#pragma mark - TVOIncomingCallDelegate
-- (void)incomingCallDidConnect:(TVOIncomingCall *)incomingCall {
-    NSLog(@"incomingCallDidConnect:");
+#pragma mark - TVOCallDelegate
+- (void)callDidConnect:(TVOCall *)call {
+    NSLog(@"callDidConnect:");
 
-    self.incomingCall = incomingCall;
-    [self toggleUIState:NO];
+    self.call = call;
+    
+    [self.placeCallButton setTitle:@"Hang Up" forState:UIControlStateNormal];
+    
+    [self toggleUIState:YES];
     [self stopSpin];
     [self routeAudioToSpeaker];
 }
 
-- (void)incomingCallDidDisconnect:(TVOIncomingCall *)incomingCall {
-    NSLog(@"incomingCallDidDisconnect:");
+- (void)callDidDisconnect:(TVOCall *)call {
+    NSLog(@"callDidDisconnect:");
     
     [self playDisconnectSound];
 
-    self.incomingCall = nil;
-    [self toggleUIState:YES];
-}
-
-- (void)incomingCall:(TVOIncomingCall *)incomingCall didFailWithError:(NSError *)error {
-    NSLog(@"incomingCall:didFailWithError: %@", [error localizedDescription]);
-
-    self.incomingCall = nil;
-    [self toggleUIState:YES];
-    [self stopSpin];
-}
-
-#pragma mark - TVOOutgoingCallDelegate
-- (void)outgoingCallDidConnect:(TVOOutgoingCall *)outgoingCall {
-    NSLog(@"outgoingCallDidConnect:");
+    self.call = nil;
     
-    self.outgoingCall = outgoingCall;
-
-    [self toggleUIState:NO];
-    [self stopSpin];
-    [self routeAudioToSpeaker];
-}
-
-- (void)outgoingCallDidDisconnect:(TVOOutgoingCall *)outgoingCall {
-    NSLog(@"outgoingCallDidDisconnect:");
+    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
     
-    [self playDisconnectSound];
-
-    self.outgoingCall = nil;
     [self toggleUIState:YES];
 }
 
-- (void)outgoingCall:(TVOOutgoingCall *)outgoingCall didFailWithError:(NSError *)error {
-    NSLog(@"outgoingCall:didFailWithError: %@", [error localizedDescription]);
+- (void)call:(TVOCall *)call didFailWithError:(NSError *)error {
+    NSLog(@"call:didFailWithError: %@", [error localizedDescription]);
 
-    self.outgoingCall = nil;
+    self.call = nil;
     [self toggleUIState:YES];
     [self stopSpin];
 }
@@ -357,8 +341,6 @@ typedef void (^RingtonePlaybackCallback)(void);
                                                 error:&error]) {
         NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
     }
-    
-    [self routeAudioToSpeaker];
     
     self.ringtonePlayer.volume = 1.0f;
     [self.ringtonePlayer play];
