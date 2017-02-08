@@ -162,11 +162,12 @@ typedef void (^RingtonePlaybackCallback)(void);
     typeof(self) __weak weakSelf = self;
 
     UIAlertAction *reject = [UIAlertAction actionWithTitle:@"Reject" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        typeof(self) __strong strongSelf = weakSelf;
         [self stopIncomingRingtone:^{
             [callInvite reject];
+            strongSelf.callInvite = nil;
         }];
 
-        typeof(self) __strong strongSelf = weakSelf;
         strongSelf.incomingAlertController = nil;
         [strongSelf toggleUIState:YES];
     }];
@@ -178,6 +179,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         [self stopIncomingRingtone:nil];
 
         typeof(self) __strong strongSelf = weakSelf;
+        strongSelf.callInvite = nil;
         strongSelf.incomingAlertController = nil;
         [strongSelf toggleUIState:YES];
     }];
@@ -187,6 +189,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         typeof(self) __strong strongSelf = weakSelf;
         [self stopIncomingRingtone:^{
             [callInvite acceptWithDelegate:strongSelf];
+            strongSelf.callInvite = nil;
         }];
 
         strongSelf.incomingAlertController = nil;
