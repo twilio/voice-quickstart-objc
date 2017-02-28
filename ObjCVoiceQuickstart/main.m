@@ -2,7 +2,7 @@
 //  main.m
 //  Twilio Voice Quickstart - Objective-C
 //
-//  Copyright © 2016 Twilio, Inc. All rights reserved.
+//  Copyright © 2017 Twilio, Inc. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
