@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11201" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="TwilioLogo.png" translatesAutoresizingMaskIntoConstraints="NO" id="Yv2-Ab-jqI">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="240" id="Ro1-3D-zN6"/>
+                                    <constraint firstAttribute="width" secondItem="Yv2-Ab-jqI" secondAttribute="height" multiplier="1:1" id="d66-dM-6YS"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="V5R-Ky-YRW">
+                                <state key="normal" title="Place Outgoing Call"/>
+                                <connections>
+                                    <action selector="placeCall:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Zc5-8L-bqN"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="Yv2-Ab-jqI" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="0Zb-hN-aPE"/>
+                            <constraint firstItem="V5R-Ky-YRW" firstAttribute="top" secondItem="Yv2-Ab-jqI" secondAttribute="bottom" constant="38" id="9rP-BR-4Q6"/>
+                            <constraint firstItem="V5R-Ky-YRW" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Sje-sA-ye7"/>
+                            <constraint firstItem="Yv2-Ab-jqI" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="o83-xB-gqy"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="iconView" destination="Yv2-Ab-jqI" id="ZlU-AK-WTh"/>
+                        <outlet property="placeCallButton" destination="V5R-Ky-YRW" id="80v-ij-SXe"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="TwilioLogo.png" width="296" height="296"/>
+    </resources>
+    <color key="tintColor" red="0.8862745098" green="0.1137254902" blue="0.1450980392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+</document>
