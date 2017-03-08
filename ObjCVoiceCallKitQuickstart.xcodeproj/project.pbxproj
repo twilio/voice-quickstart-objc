@@ -14,13 +14,12 @@
 		2459FDD61D83664300917CA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2459FDD51D83664300917CA9 /* Assets.xcassets */; };
 		2459FDD91D83664300917CA9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2459FDD71D83664300917CA9 /* LaunchScreen.storyboard */; };
 		24BA34291D87431000B0B4F7 /* TwilioLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 24BA34281D87431000B0B4F7 /* TwilioLogo.png */; };
-		6DFC1D3EF41121B0C9FFB705 /* Pods_TwilioVoiceClient_ObjCVoiceCallKitQuickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BD67FF4FA9DEEF84225F213 /* Pods_TwilioVoiceClient_ObjCVoiceCallKitQuickstart.framework */; };
+		8661BA273EF516EB5491BEAA /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BB7687FC0AD91BB81CA3D1B8 /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a */; };
 		DCBDC8BE77A960C7A128BE29 /* Pods_ObjCVoiceCallKitQuickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11AE7328B97722D74CA98ACD /* Pods_ObjCVoiceCallKitQuickstart.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		11AE7328B97722D74CA98ACD /* Pods_ObjCVoiceCallKitQuickstart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ObjCVoiceCallKitQuickstart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1BD67FF4FA9DEEF84225F213 /* Pods_TwilioVoiceClient_ObjCVoiceCallKitQuickstart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TwilioVoiceClient_ObjCVoiceCallKitQuickstart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2459FDC61D83664300917CA9 /* ObjCVoiceCallKitQuickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ObjCVoiceCallKitQuickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2459FDCA1D83664300917CA9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2459FDCC1D83664300917CA9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -37,6 +36,7 @@
 		46CB7828428C0DCCBD8C1237 /* Pods-ObjCVoiceCallKitQuickstart.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCVoiceCallKitQuickstart.release.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCVoiceCallKitQuickstart/Pods-ObjCVoiceCallKitQuickstart.release.xcconfig"; sourceTree = "<group>"; };
 		58793B929D0C0253BAEAAE08 /* Pods-ObjCVoiceCallKitQuickstart.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjCVoiceCallKitQuickstart.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ObjCVoiceCallKitQuickstart/Pods-ObjCVoiceCallKitQuickstart.debug.xcconfig"; sourceTree = "<group>"; };
 		6F214C19D17B19FA31DC9C07 /* Pods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.debug.xcconfig"; path = "Pods/Target Support Files/Pods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart/Pods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.debug.xcconfig"; sourceTree = "<group>"; };
+		BB7687FC0AD91BB81CA3D1B8 /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,7 +45,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DCBDC8BE77A960C7A128BE29 /* Pods_ObjCVoiceCallKitQuickstart.framework in Frameworks */,
-				6DFC1D3EF41121B0C9FFB705 /* Pods_TwilioVoiceClient_ObjCVoiceCallKitQuickstart.framework in Frameworks */,
+				8661BA273EF516EB5491BEAA /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,7 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				11AE7328B97722D74CA98ACD /* Pods_ObjCVoiceCallKitQuickstart.framework */,
-				1BD67FF4FA9DEEF84225F213 /* Pods_TwilioVoiceClient_ObjCVoiceCallKitQuickstart.framework */,
+				BB7687FC0AD91BB81CA3D1B8 /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
