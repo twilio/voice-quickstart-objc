@@ -15,11 +15,9 @@
 		2459FDD91D83664300917CA9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2459FDD71D83664300917CA9 /* LaunchScreen.storyboard */; };
 		24BA34291D87431000B0B4F7 /* TwilioLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 24BA34281D87431000B0B4F7 /* TwilioLogo.png */; };
 		8661BA273EF516EB5491BEAA /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BB7687FC0AD91BB81CA3D1B8 /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a */; };
-		DCBDC8BE77A960C7A128BE29 /* Pods_ObjCVoiceCallKitQuickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11AE7328B97722D74CA98ACD /* Pods_ObjCVoiceCallKitQuickstart.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		11AE7328B97722D74CA98ACD /* Pods_ObjCVoiceCallKitQuickstart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ObjCVoiceCallKitQuickstart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2459FDC61D83664300917CA9 /* ObjCVoiceCallKitQuickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ObjCVoiceCallKitQuickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2459FDCA1D83664300917CA9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2459FDCC1D83664300917CA9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -44,7 +42,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DCBDC8BE77A960C7A128BE29 /* Pods_ObjCVoiceCallKitQuickstart.framework in Frameworks */,
 				8661BA273EF516EB5491BEAA /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,7 +96,6 @@
 		5FF12A4D246637936B670360 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				11AE7328B97722D74CA98ACD /* Pods_ObjCVoiceCallKitQuickstart.framework */,
 				BB7687FC0AD91BB81CA3D1B8 /* libPods-TwilioVoiceClient-ObjCVoiceCallKitQuickstart.a */,
 			);
 			name = Frameworks;
