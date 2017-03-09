@@ -107,6 +107,8 @@ On the project’s Capabilities tab, enable “**Push Notifications**”, and en
 ### <a name="bullet10"></a>10. Receive an incoming call
 You are now ready to receive incoming calls. Rebuild your app and hit your application server's **/placeCall** endpoint: `https://{YOUR-SERVER}/placeCall`. This will trigger a Twilio REST API request that will make an inbound call to your mobile app. Once your app accepts the call, you should hear a congratulatory message.
 
+<img height="667px" src="Images/incoming-call.png"/>
+
 ## More Documentation
 You can find more documentation on getting started as well as our latest AppleDoc below:
 
