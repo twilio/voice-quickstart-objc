@@ -25,7 +25,9 @@ Once Cocoapods finishes installing, open the `ObjCVoiceQuickstart.xcworkspace` a
 
 ### <a name="bullet2"></a>2. Create a Voice API key
 Go to the [Voice API Keys](https://www.twilio.com/console/voice/dev-tools/api-keys) page and create a new API key:
+
 <img src="Images/create-api-key.png"/>
+
 **Save the generated `API_KEY` and `API_KEY_SECRET` in your notepad**. You will need them in the next step.
 
 ### <a name="bullet3"></a>3. Configure a server to generate an access token to be used in the app
@@ -39,6 +41,7 @@ Follow the instructions in the README to get the application server up and runni
 ### <a name="bullet4"></a>4. Create a TwiML application
 Next, we need to create a TwiML application. A TwiML application identifies a public URL for retrieving [TwiML call control instructions](https://www.twilio.com/docs/api/twiml). When your iOS app makes a call to the Twilio cloud, Twilio will make a webhook request to this URL, your application server will respond with generated TwiML, and Twilio will execute the instructions you’ve provided.
 To create a TwiML application, go to the [TwiML app page](https://www.twilio.com/console/voice/dev-tools/twiml-apps). Create a new TwiML application, and use the public URL of your application server’s `/outgoing` endpoint as the Voice Request URL.
+
 <img src="Images/create-twiml-app.png"/>
 
 As you can see we’ve used our [ngrok](https://ngrok.com/) public address in the Request URL field above.
@@ -62,9 +65,11 @@ Now let’s go back to the `ObjCVoiceQuickstart.xcworkspace`. Update the placeho
 <img src="Images/update-base-url.png"/>
 
 Build and run the app
+
 <img height="667px" src="Images/build-and-run.png"/>
 
 Tap the “Place Outgoing Call” button to make a call, then tap “Hang Up” to disconnect
+
 <img height="667px" src="Images/hang-up.png"/>
 
 ### <a name="bullet7"></a>7. Create VoIP Service Certificate
@@ -78,7 +83,7 @@ Go to [Apple Developer portal](https://developer.apple.com/) and you’ll need t
 <img src="Images/create-voip-service-certificate.png"/>
 
 ### <a name="bullet8"></a>8. Create a Push Credential with your VoIP Service Certificate
-Once you have generated the VoIP Services Certificate, you will need to upload it to Twilio so that Twilio can send push notifications to your app on your behalf
+Once you have generated the VoIP Services Certificate, you will need to upload it to Twilio so that Twilio can send push notifications to your app on your behalf.
 
 Export your VoIP Service Certificate as a .p12 file, then extract the certificate and private key from the .p12 file using the `openssl` command
 
@@ -96,6 +101,7 @@ Now let's go back to `server.py` and update the Push Credential SID. The Push Cr
 
 ### <a name="bullet9"></a>9. Configure Xcode project settings for push notifications
 On the project’s Capabilities tab, enable “**Push Notifications**”, and enable both “**Voice over IP**” and “**Audio, AirPlay and Picture in Picture**” capabilities in the Background Modes
+
 <img src="Images/xcode-project-capabilities.png"/>
 
 ### <a name="bullet10"></a>10. Receive an incoming call
@@ -108,9 +114,9 @@ You can find more documentation on getting started as well as our latest AppleDo
 * [AppleDoc](https://media.twiliocdn.com/sdk/ios/voice/latest/docs)
 
 ## Issues and Support
-Please file any issues you find here on Github. [ObjC](https://github.com/twilio/voice-quickstart-objc) [Swift](https://github.com/twilio/voice-quickstart-swift)
+Please file any issues you find here on Github [ObjC](https://github.com/twilio/voice-quickstart-objc) [Swift](https://github.com/twilio/voice-quickstart-swift).
 
-For general inquiries related to the Voice SDK you can file a support ticket
+For general inquiries related to the Voice SDK you can file a support ticket.
 
 ## License
 MIT
