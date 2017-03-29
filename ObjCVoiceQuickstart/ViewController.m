@@ -163,10 +163,9 @@ typedef void (^RingtonePlaybackCallback)(void);
 
     UIAlertAction *reject = [UIAlertAction actionWithTitle:@"Reject" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         typeof(self) __strong strongSelf = weakSelf;
-        [self stopIncomingRingtone:^{
-            [callInvite reject];
-            strongSelf.callInvite = nil;
-        }];
+        [strongSelf stopIncomingRingtone];
+        [callInvite reject];
+        strongSelf.callInvite = nil;
 
         strongSelf.incomingAlertController = nil;
         [strongSelf toggleUIState:YES];
@@ -175,10 +174,9 @@ typedef void (^RingtonePlaybackCallback)(void);
 
     UIAlertAction *ignore = [UIAlertAction actionWithTitle:@"Ignore" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         /* To ignore the call invite, you don't have to do anything but just literally ignore it */
-        
-        [self stopIncomingRingtone:nil];
-
         typeof(self) __strong strongSelf = weakSelf;
+        [strongSelf stopIncomingRingtone];
+
         strongSelf.callInvite = nil;
         strongSelf.incomingAlertController = nil;
         [strongSelf toggleUIState:YES];
@@ -187,10 +185,9 @@ typedef void (^RingtonePlaybackCallback)(void);
 
     UIAlertAction *accept = [UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         typeof(self) __strong strongSelf = weakSelf;
-        [self stopIncomingRingtone:^{
-            [callInvite acceptWithDelegate:strongSelf];
-            strongSelf.callInvite = nil;
-        }];
+        [strongSelf stopIncomingRingtone];
+        strongSelf.call = [callInvite acceptWithDelegate:strongSelf];
+        strongSelf.callInvite = nil;
 
         strongSelf.incomingAlertController = nil;
         [strongSelf startSpin];
@@ -218,7 +215,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         return;
     }
     
-    [self stopIncomingRingtone:nil];
+    [self stopIncomingRingtone];
     [self playDisconnectSound];
 
     if (self.incomingAlertController) {
@@ -315,17 +312,17 @@ typedef void (^RingtonePlaybackCallback)(void);
     [self playRingtone];
 }
 
-- (void)stopIncomingRingtone:(RingtonePlaybackCallback)completion {
+- (void)stopIncomingRingtone {
     if (!self.ringtonePlayer.isPlaying) {
-        if (completion) {
-            completion();
-        }
         return;
     }
     
-    self.ringtonePlayer.delegate = self;
-    self.ringtonePlaybackCallback = completion;
-    self.ringtonePlayer.numberOfLoops = 1;
+    [self.ringtonePlayer stop];
+    NSError *error = nil;
+    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
+                                                error:&error]) {
+        NSLog(@"Failed to reset AVAudioSession category: %@", [error localizedDescription]);
+    }
 }
 
 - (void)playDisconnectSound {
