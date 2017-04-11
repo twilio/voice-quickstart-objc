@@ -7,7 +7,7 @@
 
 #import "AppDelegate.h"
 
-@import TwilioVoiceClient;
+@import TwilioVoice;
 
 @interface AppDelegate ()
 @end
@@ -15,7 +15,7 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    NSLog(@"Twilio Voice Version: %@", [[VoiceClient sharedInstance] version]);
+    NSLog(@"Twilio Voice Version: %@", [[TwilioVoice sharedInstance] version]);
     return YES;
 }
 

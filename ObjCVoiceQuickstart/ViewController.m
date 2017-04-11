@@ -9,7 +9,7 @@
 
 @import AVFoundation;
 @import PushKit;
-@import TwilioVoiceClient;
+@import TwilioVoice;
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
@@ -38,7 +38,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [[VoiceClient sharedInstance] setLogLevel:TVOLogLevelVerbose];
+    [[TwilioVoice sharedInstance] setLogLevel:TVOLogLevelVerbose];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
@@ -68,7 +68,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         __weak typeof(self) weakSelf = self;
         [self playOutgoingRingtone:^{
             __strong typeof(self) strongSelf = weakSelf;
-            strongSelf.call = [[VoiceClient sharedInstance] call:[strongSelf fetchAccessToken]
+            strongSelf.call = [[TwilioVoice sharedInstance] call:[strongSelf fetchAccessToken]
                                                           params:@{}
                                                         delegate:strongSelf];
             
@@ -95,7 +95,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         self.deviceTokenString = [credentials.token description];
         NSString *accessToken = [self fetchAccessToken];
 
-        [[VoiceClient sharedInstance] registerWithAccessToken:accessToken
+        [[TwilioVoice sharedInstance] registerWithAccessToken:accessToken
                                                   deviceToken:self.deviceTokenString
                                                    completion:^(NSError *error) {
              if (error) {
@@ -114,7 +114,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     if ([type isEqualToString:PKPushTypeVoIP]) {
         NSString *accessToken = [self fetchAccessToken];
 
-        [[VoiceClient sharedInstance] unregisterWithAccessToken:accessToken
+        [[TwilioVoice sharedInstance] unregisterWithAccessToken:accessToken
                                                     deviceToken:self.deviceTokenString
                                                      completion:^(NSError * _Nullable error) {
             if (error) {
@@ -132,7 +132,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [[VoiceClient sharedInstance] handleNotification:payload.dictionaryPayload
+        [[TwilioVoice sharedInstance] handleNotification:payload.dictionaryPayload
                                                 delegate:self];
     }
 }
