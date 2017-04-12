@@ -10,7 +10,7 @@
 @import AVFoundation;
 @import PushKit;
 @import CallKit;
-@import TwilioVoiceClient;
+@import TwilioVoice;
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
@@ -36,7 +36,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [[VoiceClient sharedInstance] setLogLevel:TVOLogLevelVerbose];
+    [[TwilioVoice sharedInstance] setLogLevel:TVOLogLevelVerbose];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
@@ -97,7 +97,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
         self.deviceTokenString = [credentials.token description];
         NSString *accessToken = [self fetchAccessToken];
 
-        [[VoiceClient sharedInstance] registerWithAccessToken:accessToken
+        [[TwilioVoice sharedInstance] registerWithAccessToken:accessToken
                                                   deviceToken:self.deviceTokenString
                                                    completion:^(NSError *error) {
              if (error) {
@@ -116,7 +116,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     if ([type isEqualToString:PKPushTypeVoIP]) {
         NSString *accessToken = [self fetchAccessToken];
 
-        [[VoiceClient sharedInstance] unregisterWithAccessToken:accessToken
+        [[TwilioVoice sharedInstance] unregisterWithAccessToken:accessToken
                                                     deviceToken:self.deviceTokenString
                                                      completion:^(NSError * _Nullable error) {
             if (error) {
@@ -134,7 +134,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [[VoiceClient sharedInstance] handleNotification:payload.dictionaryPayload
+        [[TwilioVoice sharedInstance] handleNotification:payload.dictionaryPayload
                                                 delegate:self];
     }
 }
@@ -261,7 +261,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)provider:(CXProvider *)provider didActivateAudioSession:(AVAudioSession *)audioSession {
     NSLog(@"provider:didActivateAudioSession:");
 
-    [[VoiceClient sharedInstance] startAudioDevice];
+    [[TwilioVoice sharedInstance] startAudioDevice];
 }
 
 - (void)provider:(CXProvider *)provider didDeactivateAudioSession:(AVAudioSession *)audioSession {
@@ -275,9 +275,9 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)provider:(CXProvider *)provider performStartCallAction:(CXStartCallAction *)action {
     NSLog(@"provider:performStartCallAction:");
 
-    [[VoiceClient sharedInstance] configureAudioSession];
+    [[TwilioVoice sharedInstance] configureAudioSession];
 
-    self.call = [[VoiceClient sharedInstance] call:[self fetchAccessToken]
+    self.call = [[TwilioVoice sharedInstance] call:[self fetchAccessToken]
                                             params:@{}
                                           delegate:self];
 
@@ -298,7 +298,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     // RCP: Workaround from https://forums.developer.apple.com/message/169511 suggests configuring audio in the
     //      completion block of the `reportNewIncomingCallWithUUID:update:completion:` method instead of in
     //      `provider:performAnswerCallAction:` per the WWDC examples.
-    // [[VoiceClient sharedInstance] configureAudioSession];
+    // [[TwilioVoice sharedInstance] configureAudioSession];
 
     self.call = [self.callInvite acceptWithDelegate:self];
     if (self.call) {
@@ -313,7 +313,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)provider:(CXProvider *)provider performEndCallAction:(CXEndCallAction *)action {
     NSLog(@"provider:performEndCallAction:");
 
-    [[VoiceClient sharedInstance] stopAudioDevice];
+    [[TwilioVoice sharedInstance] stopAudioDevice];
 
     if (self.callInvite && self.callInvite.state == TVOCallInviteStatePending) {
         [self.callInvite reject];
@@ -370,7 +370,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
             NSLog(@"Incoming call successfully reported.");
 
             // RCP: Workaround per https://forums.developer.apple.com/message/169511
-            [[VoiceClient sharedInstance] configureAudioSession];
+            [[TwilioVoice sharedInstance] configureAudioSession];
         }
         else {
             NSLog(@"Failed to report incoming call successfully: %@.", [error localizedDescription]);
