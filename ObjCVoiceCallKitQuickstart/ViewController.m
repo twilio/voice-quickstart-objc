@@ -64,6 +64,12 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [super didReceiveMemoryWarning];
 }
 
+- (void)dealloc {
+    if (self.callKitProvider) {
+        [self.callKitProvider invalidate];
+    }
+}
+
 - (NSString *)fetchAccessToken {
     NSString *accessTokenURLString = [kYourServerBaseURLString stringByAppendingString:kAccessTokenEndpoint];
 
