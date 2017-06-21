@@ -272,6 +272,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 - (void)provider:(CXProvider *)provider didDeactivateAudioSession:(AVAudioSession *)audioSession {
     NSLog(@"provider:didDeactivateAudioSession:");
+    
+    [[TwilioVoice sharedInstance] audioSessionDeactivated];
 }
 
 - (void)provider:(CXProvider *)provider timedOutPerformingAction:(CXAction *)action {

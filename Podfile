@@ -4,7 +4,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 workspace 'ObjCVoiceQuickstart'
 
 abstract_target 'TwilioVoice' do
-  pod 'TwilioVoice', '=2.0.0-beta10'
+  pod 'TwilioVoice', '=2.0.0-beta11'
 
   target 'ObjCVoiceQuickstart' do
     project 'ObjCVoiceQuickstart.xcproject'
