@@ -164,8 +164,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [self reportIncomingCallFrom:@"Voice Bot" withUUID:callInvite.uuid];
 }
 
-- (void)callInviteCancelled:(TVOCallInvite *)callInvite {
-    NSLog(@"callInviteCancelled:");
+- (void)callInviteCanceled:(TVOCallInvite *)callInvite {
+    NSLog(@"callInviteCanceled:");
 
     [self performEndCallActionWithUUID:callInvite.uuid];
 
