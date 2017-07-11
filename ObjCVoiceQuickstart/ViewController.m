@@ -207,11 +207,11 @@ typedef void (^RingtonePlaybackCallback)(void);
     }
 }
 
-- (void)callInviteCancelled:(TVOCallInvite *)callInvite {
-    NSLog(@"callInviteCancelled:");
+- (void)callInviteCanceled:(TVOCallInvite *)callInvite {
+    NSLog(@"callInviteCanceled:");
     
     if (![callInvite.callSid isEqualToString:self.callInvite.callSid]) {
-        NSLog(@"Incoming (but not current) call invite from \"%@\" cancelled. Just ignore it.", callInvite.from);
+        NSLog(@"Incoming (but not current) call invite from \"%@\" canceled. Just ignore it.", callInvite.from);
         return;
     }
     
