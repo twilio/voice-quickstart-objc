@@ -146,7 +146,8 @@ typedef void (^RingtonePlaybackCallback)(void);
         return;
     }
     if (self.call && self.call.state == TVOCallStateConnected) {
-        NSLog(@"Already an active call. Ignoring incoming call invite from %@", callInvite.from);
+        NSLog(@"Already an active call. Rejecting incoming call invite from %@", callInvite.from);
+        [callInvite reject];
         return;
     }
     

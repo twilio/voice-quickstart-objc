@@ -155,7 +155,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
         return;
     } else if (self.call) {
         NSLog(@"Already an active call.");
-        NSLog(@"  >> Ignoring call from %@", callInvite.from);
+        NSLog(@"  >> Rejecting call from %@", callInvite.from);
+        [callInvite reject];
         return;
     }
 
