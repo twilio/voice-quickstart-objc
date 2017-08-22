@@ -182,6 +182,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
     self.call = call;
     
+    [self.callKitProvider reportOutgoingCallWithUUID:self.call.uuid connectedAtDate:[NSDate date]];
+    
     [self.placeCallButton setTitle:@"Hang Up" forState:UIControlStateNormal];
     
     [self toggleUIState:YES];
