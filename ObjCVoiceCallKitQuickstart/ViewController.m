@@ -292,7 +292,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
     [[TwilioVoice sharedInstance] configureAudioSession];
     
-    [self.callKitProvider reportOutgoingCallWithUUID:self.call.uuid startedConnectingAtDate:[NSDate date]];
+    [self.callKitProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
     
     __weak typeof(self) weakSelf = self;
     [self performVoiceCallWithUUID:action.callUUID client:nil completion:^(BOOL success) {
