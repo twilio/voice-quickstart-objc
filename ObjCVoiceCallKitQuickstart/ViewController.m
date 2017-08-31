@@ -183,6 +183,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
     self.call = call;
     self.callKitCompletionCallback(YES);
+    self.callKitCompletionCallback = nil;
     
     [self.placeCallButton setTitle:@"Hang Up" forState:UIControlStateNormal];
     
@@ -209,6 +210,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
     [self performEndCallActionWithUUID:call.uuid];
     self.callKitCompletionCallback(NO);
+    self.callKitCompletionCallback = nil;
 
     self.call = nil;
     [self toggleUIState:YES];
@@ -299,6 +301,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
         __strong typeof(self) strongSelf = weakSelf;
         if (success) {
             [strongSelf.callKitProvider reportOutgoingCallWithUUID:action.callUUID connectedAtDate:[NSDate date]];
+            [action fulfill];
         } else {
             [action fail];
         }
@@ -314,7 +317,9 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     // [[TwilioVoice sharedInstance] configureAudioSession];
 
     [self performAnswerVoiceCallWithUUID:action.callUUID completion:^(BOOL success) {
-        if (!success) {
+        if (success) {
+            [action fulfill];
+        } else {
             [action fail];
         }
     }];
