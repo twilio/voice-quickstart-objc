@@ -21,6 +21,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
 @property (nonatomic, strong) TVOCallInvite *callInvite;
 @property (nonatomic, strong) TVOCall *call;
+@property (nonatomic, strong) void(^callKitCompletionCallback)(BOOL);
 
 @property (nonatomic, strong) CXProvider *callKitProvider;
 @property (nonatomic, strong) CXCallController *callKitCallController;
@@ -181,6 +182,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     NSLog(@"callDidConnect:");
 
     self.call = call;
+    self.callKitCompletionCallback(YES);
+    self.callKitCompletionCallback = nil;
     
     [self.placeCallButton setTitle:@"Hang Up" forState:UIControlStateNormal];
     
@@ -195,6 +198,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [self performEndCallActionWithUUID:call.uuid];
 
     self.call = nil;
+    self.callKitCompletionCallback = nil;
     
     [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
     
@@ -205,6 +209,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     NSLog(@"call:didFailWithError: %@", [error localizedDescription]);
 
     [self performEndCallActionWithUUID:call.uuid];
+    self.callKitCompletionCallback(NO);
+    self.callKitCompletionCallback = nil;
 
     self.call = nil;
     [self toggleUIState:YES];
@@ -282,22 +288,24 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 - (void)provider:(CXProvider *)provider performStartCallAction:(CXStartCallAction *)action {
     NSLog(@"provider:performStartCallAction:");
+    
+    [self toggleUIState:NO];
+    [self startSpin];
 
     [[TwilioVoice sharedInstance] configureAudioSession];
-
-    self.call = [[TwilioVoice sharedInstance] call:[self fetchAccessToken]
-                                            params:@{}
-                                          delegate:self];
-
-    if (!self.call) {
-        [action fail];
-    } else {
-        self.call.uuid = action.callUUID;
-        [self toggleUIState:NO];
-        [self startSpin];
-
-        [action fulfillWithDateStarted:[NSDate date]];
-    }
+    
+    [self.callKitProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
+    
+    __weak typeof(self) weakSelf = self;
+    [self performVoiceCallWithUUID:action.callUUID client:nil completion:^(BOOL success) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (success) {
+            [strongSelf.callKitProvider reportOutgoingCallWithUUID:action.callUUID connectedAtDate:[NSDate date]];
+            [action fulfill];
+        } else {
+            [action fail];
+        }
+    }];
 }
 
 - (void)provider:(CXProvider *)provider performAnswerCallAction:(CXAnswerCallAction *)action {
@@ -308,13 +316,14 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     //      `provider:performAnswerCallAction:` per the WWDC examples.
     // [[TwilioVoice sharedInstance] configureAudioSession];
 
-    self.call = [self.callInvite acceptWithDelegate:self];
-    if (self.call) {
-        self.call.uuid = [action callUUID];
-    }
+    [self performAnswerVoiceCallWithUUID:action.callUUID completion:^(BOOL success) {
+        if (success) {
+            [action fulfill];
+        } else {
+            [action fail];
+        }
+    }];
     
-    self.callInvite = nil;
-
     [action fulfill];
 }
 
@@ -402,6 +411,38 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
             NSLog(@"EndCallAction transaction request successful");
         }
     }];
+}
+
+- (void)performVoiceCallWithUUID:(NSUUID *)uuid
+                          client:(NSString *)client
+                      completion:(void(^)(BOOL success))completionHandler {
+    
+    self.call = [[TwilioVoice sharedInstance] call:[self fetchAccessToken]
+                                            params:@{}
+                                          delegate:self];
+    
+    if (!self.call) {
+        completionHandler(NO);
+    } else {
+        self.call.uuid = uuid;
+    }
+    
+    self.callKitCompletionCallback = completionHandler;
+}
+
+- (void)performAnswerVoiceCallWithUUID:(NSUUID *)uuid
+                            completion:(void(^)(BOOL success))completionHandler {
+
+    self.call = [self.callInvite acceptWithDelegate:self];
+    if (!self.call) {
+        completionHandler(NO);
+    } else {
+        self.call.uuid = uuid;
+    }
+    
+    self.callInvite = nil;
+    
+    self.callKitCompletionCallback = completionHandler;
 }
 
 @end
