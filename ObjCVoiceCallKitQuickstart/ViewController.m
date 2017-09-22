@@ -273,13 +273,13 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)provider:(CXProvider *)provider didActivateAudioSession:(AVAudioSession *)audioSession {
     NSLog(@"provider:didActivateAudioSession:");
 
-    [[TwilioVoice sharedInstance] startAudioDevice];
+    [[TwilioVoice sharedInstance] startAudio];
 }
 
 - (void)provider:(CXProvider *)provider didDeactivateAudioSession:(AVAudioSession *)audioSession {
     NSLog(@"provider:didDeactivateAudioSession:");
     
-    [[TwilioVoice sharedInstance] audioSessionDeactivated];
+    [[TwilioVoice sharedInstance] stopAudio];
 }
 
 - (void)provider:(CXProvider *)provider timedOutPerformingAction:(CXAction *)action {
@@ -329,8 +329,6 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 - (void)provider:(CXProvider *)provider performEndCallAction:(CXEndCallAction *)action {
     NSLog(@"provider:performEndCallAction:");
-
-    [[TwilioVoice sharedInstance] stopAudioDevice];
 
     if (self.callInvite && self.callInvite.state == TVOCallInviteStatePending) {
         [self.callInvite reject];
