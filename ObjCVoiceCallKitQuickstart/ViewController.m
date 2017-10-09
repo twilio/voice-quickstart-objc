@@ -148,6 +148,14 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
+    if (callInvite.state == TVOCallInviteStatePending) {
+        [self handleCallInviteReceived:callInvite];
+    } else if (callInvite.state == TVOCallInviteStateCanceled) {
+        [self handleCallInviteCanceled:callInvite];
+    }
+}
+
+- (void)handleCallInviteReceived:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteReceived:");
     
     if (self.callInvite && self.callInvite == TVOCallInviteStatePending) {
@@ -165,7 +173,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [self reportIncomingCallFrom:@"Voice Bot" withUUID:callInvite.uuid];
 }
 
-- (void)callInviteCanceled:(TVOCallInvite *)callInvite {
+- (void)handleCallInviteCanceled:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteCanceled:");
 
     [self performEndCallActionWithUUID:callInvite.uuid];
