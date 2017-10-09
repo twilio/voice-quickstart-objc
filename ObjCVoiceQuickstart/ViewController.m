@@ -139,6 +139,14 @@ typedef void (^RingtonePlaybackCallback)(void);
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
+    if (callInvite.state == TVOCallInviteStatePending) {
+        [self handleCallInviteReceived:callInvite];
+    } else if (callInvite.state == TVOCallInviteStateCanceled) {
+        [self handleCallInviteCanceled:callInvite];
+    }
+}
+
+- (void)handleCallInviteReceived:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteReceived:");
     
     if (self.callInvite && self.callInvite.state == TVOCallInviteStatePending) {
@@ -207,7 +215,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     }
 }
 
-- (void)callInviteCanceled:(TVOCallInvite *)callInvite {
+- (void)handleCallInviteCanceled:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteCanceled:");
     
     if (![callInvite.callSid isEqualToString:self.callInvite.callSid]) {
