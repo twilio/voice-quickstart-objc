@@ -96,7 +96,7 @@ Go to the [Push Credentials page](https://www.twilio.com/console/voice/credentia
 * For the `cert.pem` you should paste everything from `-----BEGIN CERTIFICATE-----` to `-----END CERTIFICATE-----`. 
 * For the `key.pem` you should paste everything from `-----BEGIN RSA PRIVATE KEY-----` to `-----END RSA PRIVATE KEY-----`.
 
-**remember to check the “Sandbox” option**. This is important. The VoIP Service Certificate you generated can be used both in production and with Apple's sandbox infrastructure. Checking this box tells Twilio to send your pushes to the Apple sandbox infrastructure which is appropriate with your development provisioning profile.
+**Remember to check the “Sandbox” option**. This is important. The VoIP Service Certificate you generated can be used both in production and with Apple's sandbox infrastructure. Checking this box tells Twilio to send your pushes to the Apple sandbox infrastructure which is appropriate with your development provisioning profile.
 
 Once the app is ready for store submission, update the plist with “APS Environment: production” and create another Push Credential with the same VoIP Certificate but without checking the sandbox option.
 
