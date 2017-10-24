@@ -37,7 +37,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [[TwilioVoice sharedInstance] setLogLevel:TVOLogLevelVerbose];
+    [TwilioVoice setLogLevel:TVOLogLevelVerbose];
+    [TwilioVoice setModule:TVOLogModulePJSIP logLevel:TVOLogLevelVerbose];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
@@ -104,9 +105,9 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
         self.deviceTokenString = [credentials.token description];
         NSString *accessToken = [self fetchAccessToken];
 
-        [[TwilioVoice sharedInstance] registerWithAccessToken:accessToken
-                                                  deviceToken:self.deviceTokenString
-                                                   completion:^(NSError *error) {
+        [TwilioVoice registerWithAccessToken:accessToken
+                                 deviceToken:self.deviceTokenString
+                                  completion:^(NSError *error) {
              if (error) {
                  NSLog(@"An error occurred while registering: %@", [error localizedDescription]);
              }
@@ -123,9 +124,9 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     if ([type isEqualToString:PKPushTypeVoIP]) {
         NSString *accessToken = [self fetchAccessToken];
 
-        [[TwilioVoice sharedInstance] unregisterWithAccessToken:accessToken
-                                                    deviceToken:self.deviceTokenString
-                                                     completion:^(NSError * _Nullable error) {
+        [TwilioVoice unregisterWithAccessToken:accessToken
+                                   deviceToken:self.deviceTokenString
+                                    completion:^(NSError * _Nullable error) {
             if (error) {
                 NSLog(@"An error occurred while unregistering: %@", [error localizedDescription]);
             }
@@ -141,8 +142,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [[TwilioVoice sharedInstance] handleNotification:payload.dictionaryPayload
-                                                delegate:self];
+        [TwilioVoice handleNotification:payload.dictionaryPayload
+                               delegate:self];
     }
 }
 
@@ -200,29 +201,32 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [self routeAudioToSpeaker];
 }
 
-- (void)callDidDisconnect:(TVOCall *)call {
-    NSLog(@"callDidDisconnect:");
-
+- (void)call:(TVOCall *)call didFailToConnectWithError:(NSError *)error {
+    NSLog(@"Call failed to connect: %@", error);
+    
     [self performEndCallActionWithUUID:call.uuid];
-
-    self.call = nil;
-    self.callKitCompletionCallback = nil;
-    
-    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
-    
-    [self toggleUIState:YES];
+    [self callDisconnected];
 }
 
-- (void)call:(TVOCall *)call didFailWithError:(NSError *)error {
-    NSLog(@"call:didFailWithError: %@", [error localizedDescription]);
-
+- (void)call:(TVOCall *)call didDisconnectWithError:(NSError *)error {
+    if (error) {
+        NSLog(@"Call failed: %@", error);
+        self.callKitCompletionCallback(NO);
+    } else {
+        NSLog(@"Call disconnected");
+    }
+    
     [self performEndCallActionWithUUID:call.uuid];
-    self.callKitCompletionCallback(NO);
-    self.callKitCompletionCallback = nil;
+    [self callDisconnected];
+}
 
+- (void)callDisconnected {
     self.call = nil;
-    [self toggleUIState:YES];
+    self.callKitCompletionCallback = nil;
+    
     [self stopSpin];
+    [self toggleUIState:YES];
+    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
 }
 
 #pragma mark - AVAudioSession
@@ -281,13 +285,13 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)provider:(CXProvider *)provider didActivateAudioSession:(AVAudioSession *)audioSession {
     NSLog(@"provider:didActivateAudioSession:");
 
-    [[TwilioVoice sharedInstance] startAudio];
+    [TwilioVoice startAudio];
 }
 
 - (void)provider:(CXProvider *)provider didDeactivateAudioSession:(AVAudioSession *)audioSession {
     NSLog(@"provider:didDeactivateAudioSession:");
     
-    [[TwilioVoice sharedInstance] stopAudio];
+    [TwilioVoice stopAudio];
 }
 
 - (void)provider:(CXProvider *)provider timedOutPerformingAction:(CXAction *)action {
@@ -300,7 +304,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [self toggleUIState:NO];
     [self startSpin];
 
-    [[TwilioVoice sharedInstance] configureAudioSession];
+    [TwilioVoice configureAudioSession];
     
     [self.callKitProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
     
@@ -393,7 +397,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
             NSLog(@"Incoming call successfully reported.");
 
             // RCP: Workaround per https://forums.developer.apple.com/message/169511
-            [[TwilioVoice sharedInstance] configureAudioSession];
+            [TwilioVoice configureAudioSession];
         }
         else {
             NSLog(@"Failed to report incoming call successfully: %@.", [error localizedDescription]);
@@ -423,9 +427,9 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
                           client:(NSString *)client
                       completion:(void(^)(BOOL success))completionHandler {
     
-    self.call = [[TwilioVoice sharedInstance] call:[self fetchAccessToken]
-                                            params:@{}
-                                          delegate:self];
+    self.call = [TwilioVoice call:[self fetchAccessToken]
+                           params:@{}
+                         delegate:self];
     
     if (!self.call) {
         completionHandler(NO);
