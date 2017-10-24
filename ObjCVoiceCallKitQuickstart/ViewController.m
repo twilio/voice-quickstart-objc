@@ -38,7 +38,6 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [super viewDidLoad];
     
     [TwilioVoice setLogLevel:TVOLogLevelVerbose];
-    [TwilioVoice setModule:TVOLogModulePJSIP logLevel:TVOLogLevelVerbose];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
