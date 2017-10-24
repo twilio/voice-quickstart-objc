@@ -38,7 +38,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [[TwilioVoice sharedInstance] setLogLevel:TVOLogLevelVerbose];
+    [TwilioVoice setLogLevel:TVOLogLevelVerbose];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
@@ -68,9 +68,9 @@ typedef void (^RingtonePlaybackCallback)(void);
         __weak typeof(self) weakSelf = self;
         [self playOutgoingRingtone:^{
             __strong typeof(self) strongSelf = weakSelf;
-            strongSelf.call = [[TwilioVoice sharedInstance] call:[strongSelf fetchAccessToken]
-                                                          params:@{}
-                                                        delegate:strongSelf];
+            strongSelf.call = [TwilioVoice call:[strongSelf fetchAccessToken]
+                                         params:@{}
+                                       delegate:strongSelf];
             
             if (!strongSelf.call) {
                 NSLog(@"Failed to start outgoing call");
@@ -95,9 +95,9 @@ typedef void (^RingtonePlaybackCallback)(void);
         self.deviceTokenString = [credentials.token description];
         NSString *accessToken = [self fetchAccessToken];
 
-        [[TwilioVoice sharedInstance] registerWithAccessToken:accessToken
-                                                  deviceToken:self.deviceTokenString
-                                                   completion:^(NSError *error) {
+        [TwilioVoice registerWithAccessToken:accessToken
+                                 deviceToken:self.deviceTokenString
+                                  completion:^(NSError *error) {
              if (error) {
                  NSLog(@"An error occurred while registering: %@", [error localizedDescription]);
              }
@@ -114,9 +114,9 @@ typedef void (^RingtonePlaybackCallback)(void);
     if ([type isEqualToString:PKPushTypeVoIP]) {
         NSString *accessToken = [self fetchAccessToken];
 
-        [[TwilioVoice sharedInstance] unregisterWithAccessToken:accessToken
-                                                    deviceToken:self.deviceTokenString
-                                                     completion:^(NSError * _Nullable error) {
+        [TwilioVoice unregisterWithAccessToken:accessToken
+                                   deviceToken:self.deviceTokenString
+                                    completion:^(NSError * _Nullable error) {
             if (error) {
                 NSLog(@"An error occurred while unregistering: %@", [error localizedDescription]);
             }
@@ -132,8 +132,8 @@ typedef void (^RingtonePlaybackCallback)(void);
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [[TwilioVoice sharedInstance] handleNotification:payload.dictionaryPayload
-                                                delegate:self];
+        [TwilioVoice handleNotification:payload.dictionaryPayload
+                               delegate:self];
     }
 }
 
@@ -258,22 +258,27 @@ typedef void (^RingtonePlaybackCallback)(void);
     [self routeAudioToSpeaker];
 }
 
-- (void)callDidDisconnect:(TVOCall *)call {
-    NSLog(@"callDidDisconnect:");
+- (void)call:(TVOCall *)call didFailToConnectWithError:(NSError *)error {
+    NSLog(@"Call failed to connect: %@", error);
     
-    [self playDisconnectSound];
-
-    self.call = nil;
-    
-    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
-    
-    [self toggleUIState:YES];
+    [self callDisconnected];
 }
 
-- (void)call:(TVOCall *)call didFailWithError:(NSError *)error {
-    NSLog(@"call:didFailWithError: %@", [error localizedDescription]);
+- (void)call:(TVOCall *)call didDisconnectWithError:(NSError *)error {
+    if (error) {
+        NSLog(@"Call failed: %@", error);
+    } else {
+        NSLog(@"Call disconnected");
+    }
+    
+    [self callDisconnected];
+}
 
+- (void)callDisconnected {
     self.call = nil;
+    
+    [self playDisconnectSound];
+    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
     [self toggleUIState:YES];
     [self stopSpin];
 }
