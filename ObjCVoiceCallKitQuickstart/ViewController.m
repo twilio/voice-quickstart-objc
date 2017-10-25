@@ -203,6 +203,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)call:(TVOCall *)call didFailToConnectWithError:(NSError *)error {
     NSLog(@"Call failed to connect: %@", error);
     
+    self.callKitCompletionCallback(NO);
     [self performEndCallActionWithUUID:call.uuid];
     [self callDisconnected];
 }
@@ -210,7 +211,6 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 - (void)call:(TVOCall *)call didDisconnectWithError:(NSError *)error {
     if (error) {
         NSLog(@"Call failed: %@", error);
-        self.callKitCompletionCallback(NO);
     } else {
         NSLog(@"Call disconnected");
     }
