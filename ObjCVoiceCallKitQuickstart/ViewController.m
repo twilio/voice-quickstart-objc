@@ -428,14 +428,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     
     self.call = [TwilioVoice call:[self fetchAccessToken]
                            params:@{}
+                             uuid:uuid
                          delegate:self];
-    
-    if (!self.call) {
-        completionHandler(NO);
-    } else {
-        self.call.uuid = uuid;
-    }
-    
     self.callKitCompletionCallback = completionHandler;
 }
 
@@ -443,14 +437,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
                             completion:(void(^)(BOOL success))completionHandler {
 
     self.call = [self.callInvite acceptWithDelegate:self];
-    if (!self.call) {
-        completionHandler(NO);
-    } else {
-        self.call.uuid = uuid;
-    }
-    
     self.callInvite = nil;
-    
     self.callKitCompletionCallback = completionHandler;
 }
 
