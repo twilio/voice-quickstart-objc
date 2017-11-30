@@ -71,11 +71,6 @@ typedef void (^RingtonePlaybackCallback)(void);
             strongSelf.call = [TwilioVoice call:[strongSelf fetchAccessToken]
                                          params:@{}
                                        delegate:strongSelf];
-            
-            if (!strongSelf.call) {
-                NSLog(@"Failed to start outgoing call");
-                return;
-            }
         }];
         
         [self toggleUIState:NO];
