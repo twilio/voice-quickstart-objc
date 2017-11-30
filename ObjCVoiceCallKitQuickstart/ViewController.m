@@ -327,6 +327,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     //      `provider:performAnswerCallAction:` per the WWDC examples.
     // [[TwilioVoice sharedInstance] configureAudioSession];
 
+    NSAssert([self.callInvite.uuid isEqual:action.callUUID], @"We only support one Invite at a time.");
+    
     [self performAnswerVoiceCallWithUUID:action.callUUID completion:^(BOOL success) {
         if (success) {
             [action fulfill];
@@ -351,6 +353,15 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [action fulfill];
 }
 
+- (void)provider:(CXProvider *)provider performSetHeldCallAction:(CXSetHeldCallAction *)action {
+    if (self.call && self.call.state == TVOCallStateConnected) {
+        [self.call setOnHold:action.isOnHold];
+        [action fulfill];
+    } else {
+        [action fail];
+    }
+}
+
 #pragma mark - CallKit Actions
 - (void)performStartCallActionWithUUID:(NSUUID *)uuid handle:(NSString *)handle {
     if (uuid == nil || handle == nil) {
@@ -370,7 +381,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
             CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
             callUpdate.remoteHandle = callHandle;
             callUpdate.supportsDTMF = YES;
-            callUpdate.supportsHolding = NO;
+            callUpdate.supportsHolding = YES;
             callUpdate.supportsGrouping = NO;
             callUpdate.supportsUngrouping = NO;
             callUpdate.hasVideo = NO;
@@ -386,7 +397,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     CXCallUpdate *callUpdate = [[CXCallUpdate alloc] init];
     callUpdate.remoteHandle = callHandle;
     callUpdate.supportsDTMF = YES;
-    callUpdate.supportsHolding = NO;
+    callUpdate.supportsHolding = YES;
     callUpdate.supportsGrouping = NO;
     callUpdate.supportsUngrouping = NO;
     callUpdate.hasVideo = NO;
