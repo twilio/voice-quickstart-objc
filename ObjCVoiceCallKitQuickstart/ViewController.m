@@ -275,6 +275,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 #pragma mark - CXProviderDelegate
 - (void)providerDidReset:(CXProvider *)provider {
     NSLog(@"providerDidReset:");
+    TwilioVoice.audioEnabled = YES;
 }
 
 - (void)providerDidBegin:(CXProvider *)provider {
@@ -283,14 +284,12 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 - (void)provider:(CXProvider *)provider didActivateAudioSession:(AVAudioSession *)audioSession {
     NSLog(@"provider:didActivateAudioSession:");
-
-    [TwilioVoice startAudio];
+    TwilioVoice.audioEnabled = YES;
 }
 
 - (void)provider:(CXProvider *)provider didDeactivateAudioSession:(AVAudioSession *)audioSession {
     NSLog(@"provider:didDeactivateAudioSession:");
-    
-    [TwilioVoice stopAudio];
+    TwilioVoice.audioEnabled = NO;
 }
 
 - (void)provider:(CXProvider *)provider timedOutPerformingAction:(CXAction *)action {
@@ -304,6 +303,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     [self startSpin];
 
     [TwilioVoice configureAudioSession];
+    TwilioVoice.audioEnabled = NO;
     
     [self.callKitProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
     
@@ -408,6 +408,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
             // RCP: Workaround per https://forums.developer.apple.com/message/169511
             [TwilioVoice configureAudioSession];
+            TwilioVoice.audioEnabled = NO;
         }
         else {
             NSLog(@"Failed to report incoming call successfully: %@.", [error localizedDescription]);
