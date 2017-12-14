@@ -329,6 +329,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
     NSAssert([self.callInvite.uuid isEqual:action.callUUID], @"We only support one Invite at a time.");
     
+    TwilioVoice.audioEnabled = NO;
     [self performAnswerVoiceCallWithUUID:action.callUUID completion:^(BOOL success) {
         if (success) {
             [action fulfill];
@@ -408,7 +409,6 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
             // RCP: Workaround per https://forums.developer.apple.com/message/169511
             [TwilioVoice configureAudioSession];
-            TwilioVoice.audioEnabled = NO;
         }
         else {
             NSLog(@"Failed to report incoming call successfully: %@.", [error localizedDescription]);
