@@ -1,10 +1,9 @@
-source 'https://github.com/twilio/cocoapod-specs'
 source 'https://github.com/CocoaPods/Specs.git'
 
 workspace 'ObjCVoiceQuickstart'
 
 abstract_target 'TwilioVoice' do
-  pod 'TwilioVoice', '2.0.0'
+  pod 'TwilioVoice', '~> 2.0.0'
 
   target 'ObjCVoiceQuickstart' do
     platform :ios, '8.1'
