@@ -235,7 +235,7 @@ static NSString *const kTwimlParamTo = @"to";
     
     [self stopSpin];
     [self toggleUIState:YES];
-    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
+    [self.placeCallButton setTitle:@"Call" forState:UIControlStateNormal];
 }
 
 #pragma mark - AVAudioSession

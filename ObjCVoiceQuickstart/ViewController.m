@@ -282,7 +282,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     self.call = nil;
     
     [self playDisconnectSound];
-    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
+    [self.placeCallButton setTitle:@"Call" forState:UIControlStateNormal];
     [self toggleUIState:YES];
     [self stopSpin];
 }
