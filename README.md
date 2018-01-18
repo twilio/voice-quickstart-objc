@@ -70,7 +70,7 @@ Build and run the app
 
 <img height="667px" src="Images/build-and-run.png"/>
 
-Use the text field to specify the number or the identity of the call receiver, then tap the “Call” button to make a call. The TwiML parameters used in `TwilioVoice.call()` method should match the name used in the server. Tap “Hang Up” to disconnect
+Leave the text field empty and press the call button to start a call. You will hear the congratulatory message. Support for dialing another client or number is described in steps 10 and 11. Tap "Hang Up" to disconnect.
 
 <img height="667px" src="Images/hang-up.png"/>
 
