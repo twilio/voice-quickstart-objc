@@ -14,7 +14,7 @@
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
-static NSString *const kTwimlParamTo = @"server_param_to";
+static NSString *const kTwimlParamTo = @"to";
 
 @interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, CXProviderDelegate, UITextFieldDelegate>
 @property (nonatomic, strong) NSString *deviceTokenString;
