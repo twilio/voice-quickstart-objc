@@ -13,8 +13,9 @@
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
+static NSString *const kTwimlParamTo = @"to";
 
-@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, AVAudioPlayerDelegate>
+@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, AVAudioPlayerDelegate, UITextFieldDelegate>
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
@@ -25,6 +26,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 @property (nonatomic, assign, getter=isSpinning) BOOL spinning;
 
 @property (nonatomic, weak) IBOutlet UIButton *placeCallButton;
+@property (nonatomic, weak) IBOutlet UITextField *outgoingValue;
 @property (nonatomic, strong) UIAlertController* incomingAlertController;
 
 @property (nonatomic, strong) AVAudioPlayer *ringtonePlayer;
@@ -45,6 +47,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     self.voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 
     [self toggleUIState:YES];
+    self.outgoingValue.delegate = self;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -69,7 +72,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         [self playOutgoingRingtone:^{
             __strong typeof(self) strongSelf = weakSelf;
             strongSelf.call = [TwilioVoice call:[strongSelf fetchAccessToken]
-                                         params:@{}
+                                         params:@{kTwimlParamTo: self.outgoingValue.text}
                                        delegate:strongSelf];
         }];
         
@@ -80,6 +83,12 @@ typedef void (^RingtonePlaybackCallback)(void);
 
 - (void)toggleUIState:(BOOL)isEnabled {
     self.placeCallButton.enabled = isEnabled;
+}
+
+#pragma mark - UITextFieldDelegate
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [self.outgoingValue resignFirstResponder];
+    return YES;
 }
 
 #pragma mark - PKPushRegistryDelegate
@@ -273,7 +282,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     self.call = nil;
     
     [self playDisconnectSound];
-    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
+    [self.placeCallButton setTitle:@"Call" forState:UIControlStateNormal];
     [self toggleUIState:YES];
     [self stopSpin];
 }

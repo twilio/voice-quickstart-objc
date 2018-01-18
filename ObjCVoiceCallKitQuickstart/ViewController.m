@@ -14,8 +14,9 @@
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
+static NSString *const kTwimlParamTo = @"to";
 
-@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, CXProviderDelegate>
+@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, CXProviderDelegate, UITextFieldDelegate>
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
@@ -30,6 +31,8 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 @property (nonatomic, assign, getter=isSpinning) BOOL spinning;
 
 @property (nonatomic, weak) IBOutlet UIButton *placeCallButton;
+@property (nonatomic, weak) IBOutlet UITextField *outgoingValue;
+
 @end
 
 @implementation ViewController
@@ -44,6 +47,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     self.voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 
     [self toggleUIState:YES];
+    self.outgoingValue.delegate = self;
 
     [self configureCallKit];
 }
@@ -94,6 +98,12 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 
 - (void)toggleUIState:(BOOL)isEnabled {
     self.placeCallButton.enabled = isEnabled;
+}
+
+#pragma mark - UITextFieldDelegate
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [self.outgoingValue resignFirstResponder];
+    return YES;
 }
 
 #pragma mark - PKPushRegistryDelegate
@@ -225,7 +235,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
     
     [self stopSpin];
     [self toggleUIState:YES];
-    [self.placeCallButton setTitle:@"Place Outgoing Call" forState:UIControlStateNormal];
+    [self.placeCallButton setTitle:@"Call" forState:UIControlStateNormal];
 }
 
 #pragma mark - AVAudioSession
@@ -439,7 +449,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
                       completion:(void(^)(BOOL success))completionHandler {
     
     self.call = [TwilioVoice call:[self fetchAccessToken]
-                           params:@{}
+                           params:@{kTwimlParamTo: self.outgoingValue.text}
                              uuid:uuid
                          delegate:self];
     self.callKitCompletionCallback = completionHandler;

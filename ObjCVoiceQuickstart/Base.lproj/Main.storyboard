@@ -1,8 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11201" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -20,33 +23,61 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="TwilioLogo.png" translatesAutoresizingMaskIntoConstraints="NO" id="Yv2-Ab-jqI">
+                                <rect key="frame" x="67" y="116" width="240" height="240"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="240" id="Ro1-3D-zN6"/>
                                     <constraint firstAttribute="width" secondItem="Yv2-Ab-jqI" secondAttribute="height" multiplier="1:1" id="d66-dM-6YS"/>
                                 </constraints>
                             </imageView>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="C6T-hp-s2N">
+                                <rect key="frame" x="67" y="380" width="240" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="240" id="YTE-ue-UbY"/>
+                                </constraints>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="V5R-Ky-YRW">
-                                <state key="normal" title="Place Outgoing Call"/>
+                                <rect key="frame" x="172" y="462" width="30" height="30"/>
+                                <state key="normal" title="Call"/>
                                 <connections>
                                     <action selector="placeCall:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Zc5-8L-bqN"/>
                                 </connections>
                             </button>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Dial a client name or phone number. Leaving the field empty results in an automated response." translatesAutoresizingMaskIntoConstraints="NO" id="jMa-oD-f98">
+                                <rect key="frame" x="52" y="418" width="300" height="48"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="GYZ-s9-Utx"/>
+                                    <constraint firstAttribute="width" constant="300" id="lT1-Rh-qOG"/>
+                                </constraints>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="Yv2-Ab-jqI" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="0Zb-hN-aPE"/>
-                            <constraint firstItem="V5R-Ky-YRW" firstAttribute="top" secondItem="Yv2-Ab-jqI" secondAttribute="bottom" constant="38" id="9rP-BR-4Q6"/>
+                            <constraint firstItem="Yv2-Ab-jqI" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" constant="-97.5" id="0Zb-hN-aPE"/>
+                            <constraint firstItem="V5R-Ky-YRW" firstAttribute="top" secondItem="Yv2-Ab-jqI" secondAttribute="bottom" constant="106" id="9rP-BR-4Q6"/>
+                            <constraint firstItem="C6T-hp-s2N" firstAttribute="top" secondItem="Yv2-Ab-jqI" secondAttribute="bottom" constant="24" id="Rhf-nx-6Nu"/>
                             <constraint firstItem="V5R-Ky-YRW" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Sje-sA-ye7"/>
+                            <constraint firstItem="C6T-hp-s2N" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="XrL-7t-HW0"/>
+                            <constraint firstItem="jMa-oD-f98" firstAttribute="top" secondItem="C6T-hp-s2N" secondAttribute="bottom" constant="8" id="biU-zp-kQC"/>
+                            <constraint firstItem="jMa-oD-f98" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" constant="14.5" id="jbI-Sw-HOa"/>
                             <constraint firstItem="Yv2-Ab-jqI" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="o83-xB-gqy"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="iconView" destination="Yv2-Ab-jqI" id="ZlU-AK-WTh"/>
+                        <outlet property="outgoingValue" destination="C6T-hp-s2N" id="6mW-uv-3gq"/>
                         <outlet property="placeCallButton" destination="V5R-Ky-YRW" id="80v-ij-SXe"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="117.59999999999999" y="117.39130434782609"/>
         </scene>
     </scenes>
     <resources>
