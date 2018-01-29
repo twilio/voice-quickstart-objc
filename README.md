@@ -2,6 +2,7 @@
 
 ## Get started with Voice on iOS:
 * [Quickstart](#quickstart) - Run the quickstart app
+* [Access Tokens](#access-tokens) - Using access tokens
 * [More Documentation](#more-documentation) - More documentation related to the Voice iOS SDK
 * [Issues and Support](#issues-and-support) - Filing issues and general support
 
