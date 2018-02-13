@@ -13,10 +13,8 @@
 @import TwilioVoice;
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
-/*
- If your token server is written in PHP, kAccessTokenEndpoint needs .php extension at the end.
- For example : /accessToken.php
- */
+// If your token server is written in PHP, kAccessTokenEndpoint needs .php extension at the end.
+// For example : /accessToken.php
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
 static NSString *const kTwimlParamTo = @"to";
 
