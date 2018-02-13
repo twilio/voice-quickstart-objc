@@ -28,6 +28,9 @@ static NSString *const kTwimlParamTo = @"to";
 @property (nonatomic, weak) IBOutlet UIButton *placeCallButton;
 @property (nonatomic, weak) IBOutlet UITextField *outgoingValue;
 @property (nonatomic, strong) UIAlertController* incomingAlertController;
+@property (weak, nonatomic) IBOutlet UIView *callControlView;
+@property (weak, nonatomic) IBOutlet UISwitch *muteSwitch;
+@property (weak, nonatomic) IBOutlet UISwitch *speakerSwitch;
 
 @property (nonatomic, strong) AVAudioPlayer *ringtonePlayer;
 typedef void (^RingtonePlaybackCallback)(void);
@@ -46,7 +49,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     self.voipRegistry.delegate = self;
     self.voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 
-    [self toggleUIState:YES];
+    [self toggleUIState:YES showCallControl:NO];
     self.outgoingValue.delegate = self;
 }
 
@@ -66,7 +69,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 - (IBAction)placeCall:(id)sender {
     if (self.call) {
         [self.call disconnect];
-        [self toggleUIState:NO];
+        [self toggleUIState:NO showCallControl:NO];
     } else {
         __weak typeof(self) weakSelf = self;
         [self playOutgoingRingtone:^{
@@ -76,13 +79,28 @@ typedef void (^RingtonePlaybackCallback)(void);
                                        delegate:strongSelf];
         }];
         
-        [self toggleUIState:NO];
+        [self toggleUIState:NO showCallControl:NO];
         [self startSpin];
     }
 }
 
-- (void)toggleUIState:(BOOL)isEnabled {
+- (void)toggleUIState:(BOOL)isEnabled showCallControl:(BOOL)showCallControl {
     self.placeCallButton.enabled = isEnabled;
+    if (showCallControl) {
+        self.callControlView.hidden = NO;
+        self.muteSwitch.on = NO;
+        self.speakerSwitch.on = YES;
+    } else {
+        self.callControlView.hidden = YES;
+    }
+}
+
+- (IBAction)muteSwitchToggled:(UISwitch *)sender {
+    self.call.muted = sender.on;
+}
+
+- (IBAction)speakerSwitchToggled:(UISwitch *)sender {
+    [self toggleAudioRoute:sender.on];
 }
 
 #pragma mark - UITextFieldDelegate
@@ -180,7 +198,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         strongSelf.callInvite = nil;
 
         strongSelf.incomingAlertController = nil;
-        [strongSelf toggleUIState:YES];
+        [strongSelf toggleUIState:YES showCallControl:NO];
     }];
     [self.incomingAlertController addAction:reject];
 
@@ -191,7 +209,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 
         strongSelf.callInvite = nil;
         strongSelf.incomingAlertController = nil;
-        [strongSelf toggleUIState:YES];
+        [strongSelf toggleUIState:YES showCallControl:NO];
     }];
     [self.incomingAlertController addAction:ignore];
 
@@ -206,7 +224,7 @@ typedef void (^RingtonePlaybackCallback)(void);
     }];
     [self.incomingAlertController addAction:accept];
 
-    [self toggleUIState:NO];
+    [self toggleUIState:NO showCallControl:NO];
     [self presentViewController:self.incomingAlertController animated:YES completion:nil];
 
     // If the application is not in the foreground, post a local notification
@@ -236,7 +254,7 @@ typedef void (^RingtonePlaybackCallback)(void);
         [self dismissViewControllerAnimated:YES completion:^{
             typeof(self) __strong strongSelf = weakSelf;
             strongSelf.incomingAlertController = nil;
-            [strongSelf toggleUIState:YES];
+            [strongSelf toggleUIState:YES showCallControl:NO];
         }];
     }
     
@@ -257,9 +275,9 @@ typedef void (^RingtonePlaybackCallback)(void);
     
     [self.placeCallButton setTitle:@"Hang Up" forState:UIControlStateNormal];
     
-    [self toggleUIState:YES];
+    [self toggleUIState:YES showCallControl:YES];
     [self stopSpin];
-    [self routeAudioToSpeaker];
+    [self toggleAudioRoute:YES];
 }
 
 - (void)call:(TVOCall *)call didFailToConnectWithError:(NSError *)error {
@@ -283,16 +301,22 @@ typedef void (^RingtonePlaybackCallback)(void);
     
     [self playDisconnectSound];
     [self.placeCallButton setTitle:@"Call" forState:UIControlStateNormal];
-    [self toggleUIState:YES];
+    [self toggleUIState:YES showCallControl:NO];
     [self stopSpin];
 }
 
 #pragma mark - AVAudioSession
-- (void)routeAudioToSpeaker {
-    NSError * error;
-    if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:kAudioSessionOverrideAudioRoute_Speaker
-                                                            error:&error]) {
-        NSLog(@"Failed to route audio to speaker: %@", [error localizedDescription]);
+- (void)toggleAudioRoute:(BOOL)toSpeaker {
+    // The mode set by the Voice SDK is "VoiceChat" so the default audio route is the built-in receiver. Use port override to switch the route.
+    NSError *error = nil;
+    if (toSpeaker) {
+        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&error]) {
+            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+        }
+    } else {
+        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideNone error:&error]) {
+            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+        }
     }
 }
 

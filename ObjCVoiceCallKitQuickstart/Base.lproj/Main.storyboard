@@ -56,6 +56,41 @@
                                     <action selector="placeCall:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Zc5-8L-bqN"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LCr-Ji-S0e">
+                                <rect key="frame" x="67" y="503" width="240" height="88"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="viR-NY-T2b">
+                                        <rect key="frame" x="58" y="8" width="49" height="31"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <connections>
+                                            <action selector="muteSwitchToggled:" destination="BYZ-38-t0r" eventType="valueChanged" id="RqM-R2-oNj"/>
+                                        </connections>
+                                    </switch>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Mute" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Gku-bg-H1N">
+                                        <rect key="frame" x="60" y="47" width="42" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YU7-VZ-8Ys">
+                                        <rect key="frame" x="135" y="8" width="49" height="31"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <connections>
+                                            <action selector="speakerSwitchToggled:" destination="BYZ-38-t0r" eventType="valueChanged" id="YVI-eT-49v"/>
+                                        </connections>
+                                    </switch>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Speaker" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6vt-2A-dAl">
+                                        <rect key="frame" x="135" y="47" width="47" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -70,9 +105,12 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="callControlView" destination="LCr-Ji-S0e" id="hqQ-44-SIW"/>
                         <outlet property="iconView" destination="Yv2-Ab-jqI" id="ZlU-AK-WTh"/>
+                        <outlet property="muteSwitch" destination="viR-NY-T2b" id="fZy-Mo-G3K"/>
                         <outlet property="outgoingValue" destination="KbF-3Z-6Zb" id="Rqf-W7-jY1"/>
                         <outlet property="placeCallButton" destination="V5R-Ky-YRW" id="80v-ij-SXe"/>
+                        <outlet property="speakerSwitch" destination="YU7-VZ-8Ys" id="Vdc-12-cQK"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

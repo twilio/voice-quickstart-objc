@@ -56,6 +56,44 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7FK-6B-aN9">
+                                <rect key="frame" x="67" y="500" width="240" height="80"/>
+                                <subviews>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="KrG-Zq-Ktg">
+                                        <rect key="frame" x="59" y="0.0" width="49" height="31"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <connections>
+                                            <action selector="muteSwitchToggled:" destination="BYZ-38-t0r" eventType="valueChanged" id="l8Z-UX-ynH"/>
+                                        </connections>
+                                    </switch>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Mute" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ubd-Gw-xyw">
+                                        <rect key="frame" x="61" y="39" width="42" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8nd-9h-c4x">
+                                        <rect key="frame" x="135" y="0.0" width="49" height="31"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <connections>
+                                            <action selector="speakerSwitchToggled:" destination="BYZ-38-t0r" eventType="valueChanged" id="Ezg-Ix-HwX"/>
+                                        </connections>
+                                    </switch>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Speaker" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lIL-OX-BcI">
+                                        <rect key="frame" x="135" y="39" width="47" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="80" id="3Am-6Z-Vu2"/>
+                                    <constraint firstAttribute="width" constant="240" id="mYV-pk-MH7"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -66,18 +104,23 @@
                             <constraint firstItem="C6T-hp-s2N" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="XrL-7t-HW0"/>
                             <constraint firstItem="jMa-oD-f98" firstAttribute="top" secondItem="C6T-hp-s2N" secondAttribute="bottom" constant="8" id="biU-zp-kQC"/>
                             <constraint firstItem="jMa-oD-f98" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" constant="14.5" id="jbI-Sw-HOa"/>
+                            <constraint firstItem="7FK-6B-aN9" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="nlF-Eb-AVB"/>
                             <constraint firstItem="Yv2-Ab-jqI" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="o83-xB-gqy"/>
+                            <constraint firstItem="7FK-6B-aN9" firstAttribute="top" secondItem="V5R-Ky-YRW" secondAttribute="bottom" constant="8" id="tvA-E7-Qsm"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="callControlView" destination="7FK-6B-aN9" id="y0r-cU-rSo"/>
                         <outlet property="iconView" destination="Yv2-Ab-jqI" id="ZlU-AK-WTh"/>
+                        <outlet property="muteSwitch" destination="KrG-Zq-Ktg" id="7S8-TF-HbK"/>
                         <outlet property="outgoingValue" destination="C6T-hp-s2N" id="6mW-uv-3gq"/>
                         <outlet property="placeCallButton" destination="V5R-Ky-YRW" id="80v-ij-SXe"/>
+                        <outlet property="speakerSwitch" destination="8nd-9h-c4x" id="9QY-Af-l2O"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="117.59999999999999" y="117.39130434782609"/>
+            <point key="canvasLocation" x="-65" y="111"/>
         </scene>
     </scenes>
     <resources>

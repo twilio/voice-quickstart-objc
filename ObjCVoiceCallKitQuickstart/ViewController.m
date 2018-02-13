@@ -32,6 +32,9 @@ static NSString *const kTwimlParamTo = @"to";
 
 @property (nonatomic, weak) IBOutlet UIButton *placeCallButton;
 @property (nonatomic, weak) IBOutlet UITextField *outgoingValue;
+@property (weak, nonatomic) IBOutlet UIView *callControlView;
+@property (weak, nonatomic) IBOutlet UISwitch *muteSwitch;
+@property (weak, nonatomic) IBOutlet UISwitch *speakerSwitch;
 
 @end
 
@@ -46,7 +49,7 @@ static NSString *const kTwimlParamTo = @"to";
     self.voipRegistry.delegate = self;
     self.voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 
-    [self toggleUIState:YES];
+    [self toggleUIState:YES  showCallControl:NO];
     self.outgoingValue.delegate = self;
 
     [self configureCallKit];
@@ -87,7 +90,7 @@ static NSString *const kTwimlParamTo = @"to";
 - (IBAction)placeCall:(id)sender {
     if (self.call && self.call.state == TVOCallStateConnected) {
         [self.call disconnect];
-        [self toggleUIState:NO];
+        [self toggleUIState:NO showCallControl:NO];
     } else {
         NSUUID *uuid = [NSUUID UUID];
         NSString *handle = @"Voice Bot";
@@ -96,8 +99,23 @@ static NSString *const kTwimlParamTo = @"to";
     }
 }
 
-- (void)toggleUIState:(BOOL)isEnabled {
+- (void)toggleUIState:(BOOL)isEnabled showCallControl:(BOOL)showCallControl {
     self.placeCallButton.enabled = isEnabled;
+    if (showCallControl) {
+        self.callControlView.hidden = NO;
+        self.muteSwitch.on = NO;
+        self.speakerSwitch.on = YES;
+    } else {
+        self.callControlView.hidden = YES;
+    }
+}
+
+- (IBAction)muteSwitchToggled:(UISwitch *)sender {
+    self.call.muted = sender.on;
+}
+
+- (IBAction)speakerSwitchToggled:(UISwitch *)sender {
+    [self toggleAudioRoute:sender.on];
 }
 
 #pragma mark - UITextFieldDelegate
@@ -205,9 +223,9 @@ static NSString *const kTwimlParamTo = @"to";
     
     [self.placeCallButton setTitle:@"Hang Up" forState:UIControlStateNormal];
     
-    [self toggleUIState:YES];
+    [self toggleUIState:YES  showCallControl:YES];
     [self stopSpin];
-    [self routeAudioToSpeaker];
+    [self toggleAudioRoute:YES];
 }
 
 - (void)call:(TVOCall *)call didFailToConnectWithError:(NSError *)error {
@@ -234,17 +252,22 @@ static NSString *const kTwimlParamTo = @"to";
     self.callKitCompletionCallback = nil;
     
     [self stopSpin];
-    [self toggleUIState:YES];
+    [self toggleUIState:YES showCallControl:NO];
     [self.placeCallButton setTitle:@"Call" forState:UIControlStateNormal];
 }
 
 #pragma mark - AVAudioSession
-- (void)routeAudioToSpeaker {
+- (void)toggleAudioRoute:(BOOL)toSpeaker {
+    // The mode set by the Voice SDK is "VoiceChat" so the default audio route is the built-in receiver. Use port override to switch the route.
     NSError *error = nil;
-    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
-                                          withOptions:AVAudioSessionCategoryOptionDefaultToSpeaker
-                                                error:&error]) {
-        NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+    if (toSpeaker) {
+        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&error]) {
+            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+        }
+    } else {
+        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideNone error:&error]) {
+            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+        }
     }
 }
 
@@ -309,7 +332,7 @@ static NSString *const kTwimlParamTo = @"to";
 - (void)provider:(CXProvider *)provider performStartCallAction:(CXStartCallAction *)action {
     NSLog(@"provider:performStartCallAction:");
     
-    [self toggleUIState:NO];
+    [self toggleUIState:NO showCallControl:NO];
     [self startSpin];
 
     [TwilioVoice configureAudioSession];
