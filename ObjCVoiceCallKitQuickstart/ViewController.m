@@ -2,7 +2,7 @@
 //  ViewController.m
 //  Twilio Voice with CallKit Quickstart - Objective-C
 //
-//  Copyright © 2016 Twilio, Inc. All rights reserved.
+//  Copyright © 2016-2018 Twilio, Inc. All rights reserved.
 //
 
 #import "ViewController.h"
@@ -13,7 +13,9 @@
 @import TwilioVoice;
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
+// If your token server is written in PHP, kAccessTokenEndpoint needs .php extension at the end. For example : /accessToken.php
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
+static NSString *const kIdentity = @"alice";
 static NSString *const kTwimlParamTo = @"to";
 
 @interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, CXProviderDelegate, UITextFieldDelegate>
@@ -76,7 +78,8 @@ static NSString *const kTwimlParamTo = @"to";
 }
 
 - (NSString *)fetchAccessToken {
-    NSString *accessTokenURLString = [kYourServerBaseURLString stringByAppendingString:kAccessTokenEndpoint];
+    NSString *accessTokenEndpointWithIdentity = [NSString stringWithFormat:@"%@?identity=%@", kAccessTokenEndpoint, kIdentity];
+    NSString *accessTokenURLString = [kYourServerBaseURLString stringByAppendingString:accessTokenEndpointWithIdentity];
 
     NSString *accessToken = [NSString stringWithContentsOfURL:[NSURL URLWithString:accessTokenURLString]
                                                      encoding:NSUTF8StringEncoding
