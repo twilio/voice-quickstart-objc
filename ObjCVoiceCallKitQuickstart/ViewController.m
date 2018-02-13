@@ -49,7 +49,7 @@ static NSString *const kTwimlParamTo = @"to";
     self.voipRegistry.delegate = self;
     self.voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 
-    [self toggleUIState:YES  showCallControl:NO];
+    [self toggleUIState:YES showCallControl:NO];
     self.outgoingValue.delegate = self;
 
     [self configureCallKit];
@@ -223,7 +223,7 @@ static NSString *const kTwimlParamTo = @"to";
     
     [self.placeCallButton setTitle:@"Hang Up" forState:UIControlStateNormal];
     
-    [self toggleUIState:YES  showCallControl:YES];
+    [self toggleUIState:YES showCallControl:YES];
     [self stopSpin];
     [self toggleAudioRoute:YES];
 }
