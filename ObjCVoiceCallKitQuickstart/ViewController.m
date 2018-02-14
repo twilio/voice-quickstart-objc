@@ -225,7 +225,6 @@ static NSString *const kTwimlParamTo = @"to";
     
     [self toggleUIState:YES showCallControl:YES];
     [self stopSpin];
-    [self toggleAudioRoute:YES];
 }
 
 - (void)call:(TVOCall *)call didFailToConnectWithError:(NSError *)error {
@@ -336,6 +335,7 @@ static NSString *const kTwimlParamTo = @"to";
     [self startSpin];
 
     [TwilioVoice configureAudioSession];
+    [self toggleAudioRoute:YES];
     TwilioVoice.audioEnabled = NO;
     
     [self.callKitProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
@@ -442,6 +442,7 @@ static NSString *const kTwimlParamTo = @"to";
 
             // RCP: Workaround per https://forums.developer.apple.com/message/169511
             [TwilioVoice configureAudioSession];
+            [self toggleAudioRoute:YES];
         }
         else {
             NSLog(@"Failed to report incoming call successfully: %@.", [error localizedDescription]);
