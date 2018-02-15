@@ -56,9 +56,8 @@
                                     <action selector="placeCall:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Zc5-8L-bqN"/>
                                 </connections>
                             </button>
-                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LCr-Ji-S0e">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LCr-Ji-S0e">
                                 <rect key="frame" x="67" y="503" width="240" height="88"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <subviews>
                                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="viR-NY-T2b">
                                         <rect key="frame" x="58" y="8" width="49" height="31"/>
@@ -90,18 +89,24 @@
                                     </label>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="240" id="XhW-CX-7h1"/>
+                                    <constraint firstAttribute="height" constant="88" id="yQB-LQ-ZRe"/>
+                                </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="Yv2-Ab-jqI" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" constant="-98.5" id="0Zb-hN-aPE"/>
                             <constraint firstItem="V5R-Ky-YRW" firstAttribute="top" secondItem="Yv2-Ab-jqI" secondAttribute="bottom" constant="110" id="9rP-BR-4Q6"/>
+                            <constraint firstItem="LCr-Ji-S0e" firstAttribute="top" secondItem="V5R-Ky-YRW" secondAttribute="bottom" constant="8" id="JLB-FW-qyu"/>
                             <constraint firstItem="V5R-Ky-YRW" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Sje-sA-ye7"/>
                             <constraint firstItem="KbF-3Z-6Zb" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="VeB-Km-SPV"/>
                             <constraint firstItem="KbF-3Z-6Zb" firstAttribute="top" secondItem="Yv2-Ab-jqI" secondAttribute="bottom" constant="24" id="evG-yH-jC4"/>
                             <constraint firstItem="zUx-ax-Qmi" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" constant="13.5" id="gNt-34-aFv"/>
                             <constraint firstItem="zUx-ax-Qmi" firstAttribute="top" secondItem="KbF-3Z-6Zb" secondAttribute="bottom" constant="8" id="mmi-nK-T2D"/>
                             <constraint firstItem="Yv2-Ab-jqI" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="o83-xB-gqy"/>
+                            <constraint firstItem="LCr-Ji-S0e" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="xTc-1X-DGJ"/>
                         </constraints>
                     </view>
                     <connections>
