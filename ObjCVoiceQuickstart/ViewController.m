@@ -166,7 +166,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 }
 
 /**
- * This is delegate method is available on iOS 11 and above. Call the completion handler once the
+ * This delegate method is available on iOS 11 and above. Call the completion handler once the
  * notification payload is passed to the `TwilioVoice.handleNotification()` method.
  */
 - (void)pushRegistry:(PKPushRegistry *)registry
