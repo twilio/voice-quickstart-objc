@@ -169,12 +169,33 @@ static NSString *const kTwimlParamTo = @"to";
     }
 }
 
+/**
+ * Try using the `pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:` method if
+ * your application is targeting iOS 11. This delegate method wil soon be deprecated by Apple.
+ */
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
         [TwilioVoice handleNotification:payload.dictionaryPayload
                                delegate:self];
     }
+}
+
+/**
+ * This is delegate method is available in iOS 11 and above. Call the completion handler once the
+ * notification payload is passed to the `TwilioVoice.handleNotification()` method.
+ */
+- (void)pushRegistry:(PKPushRegistry *)registry
+didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
+             forType:(PKPushType)type
+withCompletionHandler:(void (^)(void))completion {
+    NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
+    if ([type isEqualToString:PKPushTypeVoIP]) {
+        [TwilioVoice handleNotification:payload.dictionaryPayload
+                               delegate:self];
+    }
+
+    completion();
 }
 
 #pragma mark - TVONotificationDelegate
