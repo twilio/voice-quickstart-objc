@@ -155,7 +155,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 
 /**
  * Try using the `pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:` method if
- * your application is targeting iOS 11. This delegate method wil soon be deprecated by Apple.
+ * your application is targeting iOS 11. According to the docs, this delegate method is deprecated by Apple.
  */
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
@@ -166,7 +166,7 @@ typedef void (^RingtonePlaybackCallback)(void);
 }
 
 /**
- * This is delegate method is available in iOS 11 and above. Call the completion handler once the
+ * This is delegate method is available on iOS 11 and above. Call the completion handler once the
  * notification payload is passed to the `TwilioVoice.handleNotification()` method.
  */
 - (void)pushRegistry:(PKPushRegistry *)registry
