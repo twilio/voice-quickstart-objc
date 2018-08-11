@@ -331,16 +331,25 @@ withCompletionHandler:(void (^)(void))completion {
 #pragma mark - AVAudioSession
 - (void)toggleAudioRoute:(BOOL)toSpeaker {
     // The mode set by the Voice SDK is "VoiceChat" so the default audio route is the built-in receiver. Use port override to switch the route.
-    NSError *error = nil;
-    if (toSpeaker) {
-        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&error]) {
-            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+    TVODefaultAudioDevice *audioDevice = (TVODefaultAudioDevice *)TwilioVoice.audioDevice;
+    audioDevice.block =  ^ {
+        // We will execute `kDefaultAVAudioSessionConfigurationBlock` first.
+        kDefaultAVAudioSessionConfigurationBlock();
+        
+        // Overwrite the audio route
+        AVAudioSession *session = [AVAudioSession sharedInstance];
+        NSError *error = nil;
+        if (toSpeaker) {
+            if (![session overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&error]) {
+                NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+            }
+        } else {
+            if (![session overrideOutputAudioPort:AVAudioSessionPortOverrideNone error:&error]) {
+                NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+            }
         }
-    } else {
-        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideNone error:&error]) {
-            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
-        }
-    }
+    };
+    audioDevice.block();
 }
 
 #pragma mark - Ringtone player & AVAudioPlayerDelegate
