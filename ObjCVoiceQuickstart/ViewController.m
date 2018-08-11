@@ -43,8 +43,6 @@ typedef void (^RingtonePlaybackCallback)(void);
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    [TwilioVoice setLogLevel:TVOLogLevelVerbose];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
@@ -76,9 +74,10 @@ typedef void (^RingtonePlaybackCallback)(void);
         __weak typeof(self) weakSelf = self;
         [self playOutgoingRingtone:^{
             __strong typeof(self) strongSelf = weakSelf;
-            strongSelf.call = [TwilioVoice call:[strongSelf fetchAccessToken]
-                                         params:@{kTwimlParamTo: self.outgoingValue.text}
-                                       delegate:strongSelf];
+            TVOConnectOptions *connectOptions = [TVOConnectOptions optionsWithAccessToken:[strongSelf fetchAccessToken] block:^(TVOConnectOptionsBuilder *builder) {
+                builder.params = @{kTwimlParamTo: self.outgoingValue.text};
+            }];
+            strongSelf.call = [TwilioVoice connectWithOptions:connectOptions delegate:strongSelf];
         }];
         
         [self toggleUIState:NO showCallControl:NO];
@@ -239,7 +238,8 @@ withCompletionHandler:(void (^)(void))completion {
     UIAlertAction *accept = [UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         typeof(self) __strong strongSelf = weakSelf;
         [strongSelf stopIncomingRingtone];
-        strongSelf.call = [callInvite acceptWithDelegate:strongSelf];
+        TVOAcceptOptions *acceptOptions = [TVOAcceptOptions optionsWithCallInvite:strongSelf.callInvite];
+        strongSelf.call = [callInvite acceptWithOptions:acceptOptions delegate:strongSelf];
         strongSelf.callInvite = nil;
 
         strongSelf.incomingAlertController = nil;
@@ -331,16 +331,25 @@ withCompletionHandler:(void (^)(void))completion {
 #pragma mark - AVAudioSession
 - (void)toggleAudioRoute:(BOOL)toSpeaker {
     // The mode set by the Voice SDK is "VoiceChat" so the default audio route is the built-in receiver. Use port override to switch the route.
-    NSError *error = nil;
-    if (toSpeaker) {
-        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&error]) {
-            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+    TVODefaultAudioDevice *audioDevice = (TVODefaultAudioDevice *)TwilioVoice.audioDevice;
+    audioDevice.block =  ^ {
+        // We will execute `kDefaultAVAudioSessionConfigurationBlock` first.
+        kDefaultAVAudioSessionConfigurationBlock();
+        
+        // Overwrite the audio route
+        AVAudioSession *session = [AVAudioSession sharedInstance];
+        NSError *error = nil;
+        if (toSpeaker) {
+            if (![session overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&error]) {
+                NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+            }
+        } else {
+            if (![session overrideOutputAudioPort:AVAudioSessionPortOverrideNone error:&error]) {
+                NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+            }
         }
-    } else {
-        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideNone error:&error]) {
-            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
-        }
-    }
+    };
+    audioDevice.block();
 }
 
 #pragma mark - Ringtone player & AVAudioPlayerDelegate

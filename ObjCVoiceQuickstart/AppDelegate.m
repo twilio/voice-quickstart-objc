@@ -15,7 +15,7 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    NSLog(@"Twilio Voice Version: %@", [TwilioVoice version]);
+    NSLog(@"Twilio Voice Version: %@", [TwilioVoice sdkVersion]);
     [self configureUserNotifications];
 
     return YES;
