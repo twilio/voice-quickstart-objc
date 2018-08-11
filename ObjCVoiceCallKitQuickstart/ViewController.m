@@ -45,8 +45,6 @@ static NSString *const kTwimlParamTo = @"to";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    [TwilioVoice setLogLevel:TVOLogLevelAll];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
