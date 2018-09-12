@@ -159,8 +159,9 @@ typedef void (^RingtonePlaybackCallback)(void);
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [TwilioVoice handleNotification:payload.dictionaryPayload
-                               delegate:self];
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+            NSLog(@"This is not a valid Twilio Voice notification.");
+        }
     }
 }
 
@@ -174,8 +175,9 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [TwilioVoice handleNotification:payload.dictionaryPayload
-                               delegate:self];
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+            NSLog(@"This is not a valid Twilio Voice notification.");
+        }
     }
     
     completion();
@@ -183,17 +185,17 @@ withCompletionHandler:(void (^)(void))completion {
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
-    if (callInvite.state == TVOCallInviteStatePending) {
-        [self handleCallInviteReceived:callInvite];
-    } else if (callInvite.state == TVOCallInviteStateCanceled) {
-        [self handleCallInviteCanceled:callInvite];
-    }
+    [self handleCallInviteReceived:callInvite];
+}
+
+- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
+    [self handleCallInviteCancelled:cancelledCallInvite];
 }
 
 - (void)handleCallInviteReceived:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteReceived:");
     
-    if (self.callInvite && self.callInvite.state == TVOCallInviteStatePending) {
+    if (self.callInvite) {
         NSLog(@"Already a pending call invite. Ignoring incoming call invite from %@", callInvite.from);
         return;
     }
@@ -260,8 +262,8 @@ withCompletionHandler:(void (^)(void))completion {
     }
 }
 
-- (void)handleCallInviteCanceled:(TVOCallInvite *)callInvite {
-    NSLog(@"callInviteCanceled:");
+- (void)handleCallInviteCancelled:(TVOCancelledCallInvite *)callInvite {
+    NSLog(@"handleCallInviteCancelled:");
     
     if (![callInvite.callSid isEqualToString:self.callInvite.callSid]) {
         NSLog(@"Incoming (but not current) call invite from \"%@\" canceled. Just ignore it.", callInvite.from);
@@ -284,10 +286,6 @@ withCompletionHandler:(void (^)(void))completion {
     self.callInvite = nil;
 
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
-}
-
-- (void)notificationError:(NSError *)error {
-    NSLog(@"notificationError: %@", [error localizedDescription]);
 }
 
 #pragma mark - TVOCallDelegate
