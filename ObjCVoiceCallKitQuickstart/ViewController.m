@@ -211,23 +211,13 @@ withCompletionHandler:(void (^)(void))completion {
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
-    [self handleCallInviteReceived:callInvite];
-}
-
-- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
-    [self handleCallInviteCancelled:cancelledCallInvite];
-}
-
-- (void)handleCallInviteReceived:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteReceived:");
     
     if (self.callInvite) {
-        NSLog(@"Already a pending incoming call invite.");
-        NSLog(@"  >> Ignoring call from %@", callInvite.from);
+        NSLog(@"A callInvite is already in progress. Ignoring the incoming call invite from %@", callInvite.from);
         return;
     } else if (self.call) {
-        NSLog(@"Already an active call.");
-        NSLog(@"  >> Ignoring call from %@", callInvite.from);
+        NSLog(@"Already an active call. Ignoring the incoming call invite from %@", callInvite.from);
         return;
     }
 
@@ -236,8 +226,14 @@ withCompletionHandler:(void (^)(void))completion {
     [self reportIncomingCallFrom:@"Voice Bot" withUUID:callInvite.uuid];
 }
 
-- (void)handleCallInviteCancelled:(TVOCancelledCallInvite *)callInvite {
+- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
     NSLog(@"handleCallInviteCancelled:");
+    
+    if (!self.callInvite ||
+        ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
+        NSLog(@"No matching pending Call Invite. Ignoring the Cancelled Call Invite");
+        return;
+    }
 
     [self performEndCallActionWithUUID:self.callInvite.uuid];
 
