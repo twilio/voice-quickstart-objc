@@ -183,8 +183,9 @@ static NSString *const kTwimlParamTo = @"to";
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [TwilioVoice handleNotification:payload.dictionaryPayload
-                               delegate:self];
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+            NSLog(@"This is not a valid Twilio Voice notification.");
+        }
     }
 }
 
@@ -198,8 +199,9 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [TwilioVoice handleNotification:payload.dictionaryPayload
-                               delegate:self];
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+            NSLog(@"This is not a valid Twilio Voice notification.");
+        }
     }
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -209,23 +211,13 @@ withCompletionHandler:(void (^)(void))completion {
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
-    if (callInvite.state == TVOCallInviteStatePending) {
-        [self handleCallInviteReceived:callInvite];
-    } else if (callInvite.state == TVOCallInviteStateCanceled) {
-        [self handleCallInviteCanceled:callInvite];
-    }
-}
-
-- (void)handleCallInviteReceived:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteReceived:");
     
-    if (self.callInvite && self.callInvite == TVOCallInviteStatePending) {
-        NSLog(@"Already a pending incoming call invite.");
-        NSLog(@"  >> Ignoring call from %@", callInvite.from);
+    if (self.callInvite) {
+        NSLog(@"A CallInvite is already in progress. Ignoring the incoming CallInvite from %@", callInvite.from);
         return;
     } else if (self.call) {
-        NSLog(@"Already an active call.");
-        NSLog(@"  >> Ignoring call from %@", callInvite.from);
+        NSLog(@"Already an active call. Ignoring the incoming CallInvite from %@", callInvite.from);
         return;
     }
 
@@ -234,16 +226,18 @@ withCompletionHandler:(void (^)(void))completion {
     [self reportIncomingCallFrom:@"Voice Bot" withUUID:callInvite.uuid];
 }
 
-- (void)handleCallInviteCanceled:(TVOCallInvite *)callInvite {
-    NSLog(@"callInviteCanceled:");
+- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
+    NSLog(@"cancelledCallInviteReceived:");
+    
+    if (!self.callInvite ||
+        ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
+        NSLog(@"No matching pending CallInvite. Ignoring the Cancelled CallInvite");
+        return;
+    }
 
-    [self performEndCallActionWithUUID:callInvite.uuid];
+    [self performEndCallActionWithUUID:self.callInvite.uuid];
 
     self.callInvite = nil;
-}
-
-- (void)notificationError:(NSError *)error {
-    NSLog(@"notificationError: %@", [error localizedDescription]);
 }
 
 #pragma mark - TVOCallDelegate
@@ -414,7 +408,7 @@ withCompletionHandler:(void (^)(void))completion {
 - (void)provider:(CXProvider *)provider performEndCallAction:(CXEndCallAction *)action {
     NSLog(@"provider:performEndCallAction:");
 
-    if (self.callInvite && self.callInvite.state == TVOCallInviteStatePending) {
+    if (self.callInvite) {
         [self.callInvite reject];
         self.callInvite = nil;
     } else if (self.call) {
@@ -522,9 +516,16 @@ withCompletionHandler:(void (^)(void))completion {
         __strong typeof(self) strongSelf = weakSelf;
         builder.uuid = strongSelf.callInvite.uuid;
     }];
+
     self.call = [self.callInvite acceptWithOptions:acceptOptions delegate:self];
+
+    if (!self.call) {
+        completionHandler(NO);
+    } else {
+        self.callKitCompletionCallback = completionHandler;
+    }
+    
     self.callInvite = nil;
-    self.callKitCompletionCallback = completionHandler;
 }
 
 @end
