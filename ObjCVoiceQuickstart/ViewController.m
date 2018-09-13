@@ -188,11 +188,11 @@ withCompletionHandler:(void (^)(void))completion {
     NSLog(@"callInviteReceived:");
     
     if (self.callInvite) {
-        NSLog(@"A callInvite is already in progress. Ignoring the incoming call invite from %@", callInvite.from);
+        NSLog(@"A CallInvite is already in progress. Ignoring the incoming CallInvite from %@", callInvite.from);
         return;
     }
     if (self.call && self.call.state == TVOCallStateConnected) {
-        NSLog(@"Already an active call. Ignoring incoming call invite from %@", callInvite.from);
+        NSLog(@"Already an active call. Ignoring incoming CallInvite from %@", callInvite.from);
         return;
     }
     
@@ -255,11 +255,11 @@ withCompletionHandler:(void (^)(void))completion {
 }
 
 - (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
-    NSLog(@"handleCallInviteCancelled:");
+    NSLog(@"cancelledCallInviteReceived:");
     
     if (!self.callInvite ||
         ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
-        NSLog(@"No matching pending Call Invite. Ignoring the Cancelled Call Invite");
+        NSLog(@"No matching pending CallInvite. Ignoring the Cancelled CallInvite");
         return;
     }
     
