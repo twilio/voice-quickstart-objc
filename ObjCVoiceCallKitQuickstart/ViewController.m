@@ -99,7 +99,7 @@ static NSString *const kTwimlParamTo = @"to";
 
 - (IBAction)placeCall:(id)sender {
     if (self.call && self.call.state == TVOCallStateConnected) {
-        [self.call disconnect];
+        [self performEndCallActionWithUUID:self.call.uuid];
         [self toggleUIState:NO showCallControl:NO];
     } else {
         NSUUID *uuid = [NSUUID UUID];
@@ -269,8 +269,7 @@ withCompletionHandler:(void (^)(void))completion {
     } else {
         NSLog(@"Call disconnected");
     }
-    
-    [self performEndCallActionWithUUID:call.uuid];
+
     [self callDisconnected];
 }
 
