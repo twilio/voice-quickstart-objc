@@ -376,7 +376,7 @@ Pass custom parameters in TwiML:
 </Response>
 ```
 
-`callInvite.customParameters`:
+`callInvite.customParameters` returns a dictionary of key-value pairs passed in the TwiML:
 
 ```.objc
 {
