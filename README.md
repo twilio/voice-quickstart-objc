@@ -225,7 +225,7 @@ There are number of techniques you can use to ensure that access token expiry is
 - Retain the access token along with the timestamp of when it was requested so you can verify ahead of time whether the token has already expired based on the `time-to-live` being used by your server.
 - Prefetch the access token whenever the `UIApplication`, or `UIViewController` associated with an outgoing call is created.
 
-## Migragion Guide
+## Migration Guide
 This section describes API changes and additions to ease migration from Voice iOS 2.X to Voice iOS 3.X. Each section provides code snippets to assist in transitioning to the new API.
 
 ### TVOCallInvite Changes
@@ -311,6 +311,39 @@ typedef NS_ENUM(NSUInteger, TVOCallState) {
 - (void)callDidStartRinging:(nonnull TVOCall *)call;
 
 @end
+```
+
+### Media Establishment & Connectivity
+The Voice iOS 3.X SDK uses WebRTC. The exchange of real-time media requires the use of Interactive Connectivity Establishment(ICE) to establish a media connection between the client and the media server. In some network environments where network access is restricted it may be necessary to provide ICE servers to establish a media connection. We reccomend using the [Network Traversal Service (NTS)](https://www.twilio.com/stun-turn) to obtain ICE servers. ICE servers can be provided when making or accepting a call by passing them into `TVOConnectOptions` or `TVOAcceptOptions` in the following way:
+
+```.objc
+TVOIceOptions *iceOptions;
+
+NSMutableArray *iceServers = [NSMutableArray array];
+TVOIceServer *iceServer1 = [[TVOIceServer alloc] initWithURLString:@"stun:global.stun.twilio.com:3478?transport=udp"
+                                                          username:@""
+                                                          password:@""];
+[iceServers addObject:iceServer];
+
+TVOIceServer *iceServer2 = [[TVOIceServer alloc] initWithURLString:@"turn:global.turn.twilio.com:3478?transport=udp"
+                                                          username:@"TURN_USERNAME"
+                                                          password:@"TURN_PASSWORD"];
+[iceServers addObject:iceServer2];
+
+iceOptions = [TVOIceOptions optionsWithBlock:^(TVOIceOptionsBuilder *builder) {
+    builder.servers = iceServers;
+}];
+
+// Specify ICE options in the builder
+TVOConnectOptions *options = [TVOConnectOptions optionsWithAccessToken:accessToken
+                                                                 block:^(TVOConnectOptionsBuilder *builder) {
+    builder.iceOptions = iceOptions;
+}];
+
+TVOAcceptOptions *options = [TVOAcceptOptions optionsWithCallInvite:callInvite
+                                                              block:^(TVOAcceptOptionsBuilder *builder) {
+    builder.iceOptions = iceOptions;
+}];
 ```
 
 ### Audio Device
