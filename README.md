@@ -384,7 +384,7 @@ An example of managing the `TVODefaultAudioDevice` while connecting a CallKit Ca
     self.audioDevice.block();
 
     [self.callKitProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
-    
+
     __weak typeof(self) weakSelf = self;
     [self performVoiceCallWithUUID:action.callUUID client:nil completion:^(BOOL success) {
         __strong typeof(self) strongSelf = weakSelf;
@@ -401,22 +401,26 @@ An example of managing the `TVODefaultAudioDevice` while connecting a CallKit Ca
     self.audioDevice.enabled = YES;
 }
 
-- (void)performVoiceCallWithUUID:(NSUUID *)uuid
-                          client:(NSString *)client
-                      completion:(void(^)(BOOL success))completionHandler {
-    __weak typeof(self) weakSelf = self;
-    TVOConnectOptions *connectOptions = [TVOConnectOptions optionsWithAccessToken:[self fetchAccessToken] block:^(TVOConnectOptionsBuilder *builder) {
-        __strong typeof(self) strongSelf = weakSelf;
-        builder.params = @{kTwimlParamTo: strongSelf.outgoingValue.text};
-        builder.uuid = uuid;
+- (void)provider:(CXProvider *)provider performAnswerCallAction:(CXAnswerCallAction *)action {
+    self.audioDevice.enabled = NO;
+    self.audioDevice.block();
+
+    [self performAnswerVoiceCallWithUUID:action.callUUID completion:^(BOOL success) {
+        if (success) {
+            [action fulfill];
+        } else {
+            [action fail];
+        }
     }];
-    self.call = [TwilioVoice connectWithOptions:connectOptions delegate:self];
-    self.callKitCompletionCallback = completionHandler;
+
+    [action fulfill];
 }
 
-- (void)callDidConnect:(TVOCall *)call {
-    self.callKitCompletionCallback(YES);
-    self.callKitCompletionCallback = nil;
+- (void)provider:(CXProvider *)provider performEndCallAction:(CXEndCallAction *)action {
+    // Disconnect or reject the call
+
+    self.audioDevice.enabled = YES;
+    [action fulfill];
 }
 ```
 
