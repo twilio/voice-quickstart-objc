@@ -347,9 +347,12 @@ TVOAcceptOptions *options = [TVOAcceptOptions optionsWithCallInvite:callInvite
 ```
 
 ### Audio Device
-The Voice iOS 3.X SDK deprecates the `CallKitIntegration` category from `TwilioVoice` in favor of a new property called `TVODefaultAudioDevice.enabled`. This property provides developers with a mechanism to enable or disable the activation of the audio device prior to connecting to a Call or to stop or start the audio device while you are already connected to a Call. A Cal can now be connected without activating the audio device by setting `TVODefaultAudioDevice.enabled` to `NO` and can be enabled during the lifecycle of the Call by setting `TVODefaultAudioDevice.enabled` to `YES`. The default value is `YES`. This API change was made to ensure full compatibility with CallKit as well as supporting other use cases where developers may need to disable the audio device during a call.
+The Voice iOS 3.X SDK introduces audio device APIs.
 
-Examples #1 - Changing the audio route from receiver to the speaker in a live call:
+#### TVODefaultAudioDevide
+In Voice iOS 3.X SDK, `TVODefaultAudioDevice` is used as the default device for rendering and capturing audio.
+
+An example of using `TVODefaultAudioDevice` to change the audio route from receiver to the speaker in a live call:
 
 ```.objc
 // The Voice SDK uses TVODefaultAudioDevice by default.
@@ -367,7 +370,60 @@ audioDevice.block =  ^ {
 };
 audioDevice.block();
 ```
-Example #2 - Connecting to a Call using the `AVAudioSessionCategoryPlayback` category:
+
+#### CallKit
+The Voice iOS 3.X SDK deprecates the `CallKitIntegration` category from `TwilioVoice` in favor of a new property called `TVODefaultAudioDevice.enabled`. This property provides developers with a mechanism to enable or disable the activation of the audio device prior to connecting to a Call or to stop or start the audio device while you are already connected to a Call. A Cal can now be connected without activating the audio device by setting `TVODefaultAudioDevice.enabled` to `NO` and can be enabled during the lifecycle of the Call by setting `TVODefaultAudioDevice.enabled` to `YES`. The default value is `YES`. This API change was made to ensure full compatibility with CallKit as well as supporting other use cases where developers may need to disable the audio device during a call.
+
+An example of managing the `TVODefaultAudioDevice` while connecting a CallKit Call:
+
+```.objc
+@property (nonatomic, strong) TVODefaultAudioDevice *audioDevice;
+
+- (void)provider:(CXProvider *)provider performStartCallAction:(CXStartCallAction *)action {
+    self.audioDevice.enabled = NO;
+    self.audioDevice.block();
+
+    [self.callKitProvider reportOutgoingCallWithUUID:action.callUUID startedConnectingAtDate:[NSDate date]];
+    
+    __weak typeof(self) weakSelf = self;
+    [self performVoiceCallWithUUID:action.callUUID client:nil completion:^(BOOL success) {
+        __strong typeof(self) strongSelf = weakSelf;
+        if (success) {
+            [strongSelf.callKitProvider reportOutgoingCallWithUUID:action.callUUID connectedAtDate:[NSDate date]];
+            [action fulfill];
+        } else {
+            [action fail];
+        }
+    }];
+}
+
+- (void)provider:(CXProvider *)provider didActivateAudioSession:(AVAudioSession *)audioSession {
+    self.audioDevice.enabled = YES;
+}
+
+- (void)performVoiceCallWithUUID:(NSUUID *)uuid
+                          client:(NSString *)client
+                      completion:(void(^)(BOOL success))completionHandler {
+    __weak typeof(self) weakSelf = self;
+    TVOConnectOptions *connectOptions = [TVOConnectOptions optionsWithAccessToken:[self fetchAccessToken] block:^(TVOConnectOptionsBuilder *builder) {
+        __strong typeof(self) strongSelf = weakSelf;
+        builder.params = @{kTwimlParamTo: strongSelf.outgoingValue.text};
+        builder.uuid = uuid;
+    }];
+    self.call = [TwilioVoice connectWithOptions:connectOptions delegate:self];
+    self.callKitCompletionCallback = completionHandler;
+}
+
+- (void)callDidConnect:(TVOCall *)call {
+    self.callKitCompletionCallback(YES);
+    self.callKitCompletionCallback = nil;
+}
+```
+
+#### TVOAudioDevice
+The `TVOAudioDevice` protocol gives you the ability to replace `TVODefaultAudioDevice`. By implementing the `TVOAudioDevice` protocol, you can write your own audio capturer to feed audio samples to the Voice SDK and an audio renderer to receive the remote audio samples. For example, you could integrate with `ReplayKit2` and capture application audio for broadcast or play music using `AVAssetReader`.
+
+Connecting to a Call using the `AVAudioSessionCategoryPlayback` category:
 
 ```.objc
 id<TVOAudioDevice> audioDevice = [TVODefaultAudioDevice audioDeviceWithBlock:^ {
@@ -415,6 +471,23 @@ Pass custom parameters in TwiML:
 {
   "caller_first_name" = "alice";
   "caller_last_name" = "smith";
+}
+```
+
+### Media Stats
+In Voice iOS 3.X SDK you can now access media stats in a Call using the `[TVOCall getStatsWithBlock:]` method. 
+
+```.objc
+[call getStatsWithBlock:^(NSArray<TVOStatsReport *> *statsReports) {
+    for (TVOStatsReport *report in statsReports) {
+        NSArray *localAudioTracks = report.localAudioTrackStats;
+        TVOLocalAudioTrackStats *localAudioTrackStats = localAudioTracks[0];
+        NSArray *remoteAudioTracks = report.remoteAudioTrackStats;
+        TVORemoteAudioTrackStats *remoteAudioTrackStats = remoteAudioTracks[0];
+
+        NSLog(@"Local Audio Track - audio level: %lu, packets sent: %lu", localAudioTrackStats.audioLevel, localAudioTrackStats.packetsSent);
+        NSLog(@"Remote Audio Track - audio level: %lu, packets received: %lu", remoteAudioTrackStats.audioLevel, remoteAudioTrackStats.packetsReceived);
+    }
 }
 ```
 
