@@ -179,7 +179,9 @@ withCompletionHandler:(void (^)(void))completion {
                                delegate:self];
     }
     
-    completion();
+    dispatch_async(dispatch_get_main_queue(), ^{
+        completion();
+    })
 }
 
 #pragma mark - TVONotificationDelegate
