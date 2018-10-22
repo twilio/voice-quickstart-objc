@@ -34,7 +34,7 @@ To get started with the quickstart application follow these steps. Steps 1-6 wil
 Add the following line to your Cartfile
 
 ```
-github "twilio/twilio-voice-ios" "3.0.0-beta1"
+github "twilio/twilio-voice-ios"
 ```
 
 Then run `carthage bootstrap` (or `carthage update` if you are updating your SDKs)
