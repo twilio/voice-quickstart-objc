@@ -9,6 +9,7 @@
 
 @import AVFoundation;
 @import PushKit;
+@import UserNotifications;
 @import TwilioVoice;
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
@@ -246,11 +247,21 @@ withCompletionHandler:(void (^)(void))completion {
 
     // If the application is not in the foreground, post a local notification
     if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateActive) {
-        UIApplication* app = [UIApplication sharedApplication];
-        UILocalNotification* notification = [[UILocalNotification alloc] init];
-        notification.alertBody = [NSString stringWithFormat:@"Incoming Call from %@", callInvite.from];
-
-        [app presentLocalNotificationNow:notification];
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+        content.title = @"Incoming Call";
+        content.body = [NSString stringWithFormat:@"Call Invite from %@", callInvite.from];
+        content.sound = [UNNotificationSound defaultSound];
+        
+        UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1 repeats:NO];
+        
+        UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:@"VoiceLocaNotification"
+                                                                              content:content
+                                                                              trigger:trigger];
+        
+        [center addNotificationRequest:request withCompletionHandler:^(NSError *error) {
+            NSLog(@"Failed to add notification request: %@", error);
+        }];
     }
 }
 
@@ -278,7 +289,7 @@ withCompletionHandler:(void (^)(void))completion {
     
     self.callInvite = nil;
 
-    [[UIApplication sharedApplication] cancelAllLocalNotifications];
+    [[UNUserNotificationCenter currentNotificationCenter] removeAllPendingNotificationRequests];
 }
 
 #pragma mark - TVOCallDelegate
