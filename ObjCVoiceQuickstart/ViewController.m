@@ -9,8 +9,8 @@
 
 @import AVFoundation;
 @import PushKit;
-@import UserNotifications;
 @import TwilioVoice;
+@import UserNotifications;
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
@@ -252,12 +252,10 @@ withCompletionHandler:(void (^)(void))completion {
         content.title = @"Incoming Call";
         content.body = [NSString stringWithFormat:@"Call Invite from %@", callInvite.from];
         content.sound = [UNNotificationSound defaultSound];
-        
-        UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1 repeats:NO];
-        
+
         UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:@"VoiceLocaNotification"
                                                                               content:content
-                                                                              trigger:trigger];
+                                                                              trigger:nil];
         
         [center addNotificationRequest:request withCompletionHandler:^(NSError *error) {
             NSLog(@"Failed to add notification request: %@", error);
