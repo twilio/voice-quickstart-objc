@@ -233,8 +233,9 @@ Voice iOS 3.X has a number of new features listed below:
 2. [Custom Parameters](#custom-parameters)
 3. [Ringing](#ringing)
 4. [Stats](#media-stats)
-5. [TVODefaultAudioDevice](#tvodefaultaudiodevice)
-6. [TVOAudioDevice Protocol](#tvoaudiodevice-protocol)
+5. [Audio Device APIs](#audio-device-apis)
+  * [Default Audio Device](#default-audio-device)
+  * [Custom Audio Device](#custom-audio-device)
 
 #### <a name="webrtc"></a>WebRTC
 The SDK is built using Chromium WebRTC for iOS. This ensures that over time developers will get the best real-time media streaming capabilities available for iOS. Additionally, upgrades to new versions of Chromium WebRTC will happen without changing the public API whenever possible.
@@ -305,8 +306,9 @@ In Voice iOS 3.X SDK you can now access media stats in a Call using the `[TVOCal
     }
 }
 ```
+### <a name="audio-device-apis"></a>Audio Device APIs
 
-#### <a name="tvodefaultaudiodevice"></a>TVODefaultAudioDevide
+#### <a name="default-audio-device"></a>Default Audio Device
 In Voice iOS 3.X SDK, `TVODefaultAudioDevice` is used as the default device for rendering and capturing audio.
 
 An example of using `TVODefaultAudioDevice` to change the audio route from receiver to the speaker in a live call:
@@ -328,7 +330,7 @@ audioDevice.block =  ^ {
 audioDevice.block();
 ```
 
-#### <a name="tvoaudiodevice-protocol"></a>TVOAudioDevice Protocol
+#### <a name="custom-audio-device"></a>Custom Audio Device
 The `TVOAudioDevice` protocol gives you the ability to replace `TVODefaultAudioDevice`. By implementing the `TVOAudioDevice` protocol, you can write your own audio capturer to feed audio samples to the Voice SDK and an audio renderer to receive the remote audio samples. For example, you could integrate with `ReplayKit2` and capture application audio for broadcast or play music using `AVAssetReader`.
 
 Connecting to a Call using the `AVAudioSessionCategoryPlayback` category:
