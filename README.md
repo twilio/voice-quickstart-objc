@@ -231,8 +231,8 @@ Voice iOS 3.X has a number of new features listed below:
 
 1. [WebRTC](#webrtc)
 2. [Custom Parameters](#custom-parameters)
-3. [Ringing](#ringing)
-4. [Stats](#media-stats)
+3. [Call Ringing APIs](#call-ringing-apis)
+4. [Media Stats](#media-stats)
 5. [Audio Device APIs](#audio-device-apis)
   * [Default Audio Device](#default-audio-device)
   * [Custom Audio Device](#custom-audio-device)
@@ -267,7 +267,7 @@ Pass custom parameters in TwiML:
 }
 ```
 
-#### <a name="ringing"></a>Ringing
+#### <a name="call-ringing-apis"></a>Call Ringing APIs
 Ringing is now provided as a call state. The delegate method `callDidStartRinging:` corresponding to this state transition is called once before the `callDidConnect:` method when the callee is being alerted of a Call. The behavior of this callback is determined by the `answerOnBridge` flag provided in the `Dial` verb of your TwiML application associated with this client. If the `answerOnBridge` flag is `false`, which is the default, the `callDidConnect:` callback will be called immediately after `callDidStartRinging:`. If the `answerOnBridge` flag is `true`, this will cause the `callDidConnect:` method being called only after the Call is answered. See [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge) for more details on how to use it with the `Dial` TwiML verb. If the TwiML response contains a `Say` verb, then the `callDidConnect:` method will be called immediately after `callDidStartRinging:` is called, irrespective of the value of `answerOnBridge` being set to `true` or `false`.
 
 These changes are added as follows:
