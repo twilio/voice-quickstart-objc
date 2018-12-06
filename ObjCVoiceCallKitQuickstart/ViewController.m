@@ -105,7 +105,68 @@ static NSString *const kTwimlParamTo = @"to";
         NSUUID *uuid = [NSUUID UUID];
         NSString *handle = @"Voice Bot";
         
-        [self performStartCallActionWithUUID:uuid handle:handle];
+        [self checkRecordPermission:^(BOOL permissionGranted) {
+            if (!permissionGranted) {
+                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Voice Quick Start"
+                                                                                         message:@"Microphone permission not granted."
+                                                                                  preferredStyle:UIAlertControllerStyleAlert];
+
+                typeof(self) __weak weakSelf = self;
+                UIAlertAction *continueWithoutMic = [UIAlertAction actionWithTitle:@"Continue without microphone"
+                                                                             style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                    typeof(self) __strong strongSelf = weakSelf;
+                    [strongSelf performStartCallActionWithUUID:uuid handle:handle];
+                }];
+                [alertController addAction:continueWithoutMic];
+
+                NSDictionary *openURLOptions = @{UIApplicationOpenURLOptionUniversalLinksOnly: @NO};
+                UIAlertAction *goToSettings = [UIAlertAction actionWithTitle:@"Settings"
+                                                                       style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]
+                                                       options:openURLOptions
+                                             completionHandler:nil];
+                }];
+                [alertController addAction:goToSettings];
+                
+                UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel"
+                                                                 style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                    typeof(self) __strong strongSelf = weakSelf;
+                    [strongSelf toggleUIState:YES showCallControl:NO];
+                    [strongSelf stopSpin];
+                }];
+                [alertController addAction:cancel];
+                
+                [self presentViewController:alertController animated:YES completion:nil];
+            } else {
+                [self performStartCallActionWithUUID:uuid handle:handle];
+            }
+        }];
+    }
+}
+
+- (void)checkRecordPermission:(void(^)(BOOL permissionGranted))completion {
+    AVAudioSessionRecordPermission permissionStatus = [[AVAudioSession sharedInstance] recordPermission];
+    switch (permissionStatus) {
+        case AVAudioSessionRecordPermissionGranted:
+            // Record permission already granted.
+            completion(YES);
+            break;
+        case AVAudioSessionRecordPermissionDenied:
+            // Record permission denied.
+            completion(NO);
+            break;
+        case AVAudioSessionRecordPermissionUndetermined:
+        {
+            // Requesting record permission.
+            // Optional: pop up app dialog to let the users know if they want to request.
+            [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                completion(granted);
+            }];
+            break;
+        }
+        default:
+            completion(NO);
+            break;
     }
 }
 

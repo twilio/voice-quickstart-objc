@@ -75,14 +75,79 @@ typedef void (^RingtonePlaybackCallback)(void);
         __weak typeof(self) weakSelf = self;
         [self playOutgoingRingtone:^{
             __strong typeof(self) strongSelf = weakSelf;
-            TVOConnectOptions *connectOptions = [TVOConnectOptions optionsWithAccessToken:[strongSelf fetchAccessToken] block:^(TVOConnectOptionsBuilder *builder) {
-                builder.params = @{kTwimlParamTo: self.outgoingValue.text};
-            }];
-            strongSelf.call = [TwilioVoice connectWithOptions:connectOptions delegate:strongSelf];
+            [strongSelf makeCall:strongSelf.outgoingValue.text];
         }];
         
         [self toggleUIState:NO showCallControl:NO];
         [self startSpin];
+    }
+}
+
+- (void)makeCall:(NSString *)to {
+    TVOConnectOptions *connectOptions = [TVOConnectOptions optionsWithAccessToken:[self fetchAccessToken] block:^(TVOConnectOptionsBuilder *builder) {
+        builder.params = @{kTwimlParamTo: to};
+    }];
+
+    typeof(self) __weak weakSelf = self;
+    [self checkRecordPermission:^(BOOL permissionGranted) {
+        typeof(self) __strong strongSelf = weakSelf;
+        if (!permissionGranted) {
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Voice Quick Start"
+                                                                                     message:@"Microphone permission not granted."
+                                                                              preferredStyle:UIAlertControllerStyleAlert];
+
+            UIAlertAction *continueWithoutMic = [UIAlertAction actionWithTitle:@"Continue without microphone"
+                                                                         style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                strongSelf.call = [TwilioVoice connectWithOptions:connectOptions delegate:strongSelf];
+            }];
+            [alertController addAction:continueWithoutMic];
+            
+            NSDictionary *openURLOptions = @{UIApplicationOpenURLOptionUniversalLinksOnly: @NO};
+            UIAlertAction *goToSettings = [UIAlertAction actionWithTitle:@"Settings"
+                                                                   style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]
+                                                   options:openURLOptions
+                                         completionHandler:nil];
+            }];
+            [alertController addAction:goToSettings];
+            
+            UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel"
+                                                             style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                [strongSelf toggleUIState:YES showCallControl:NO];
+                [strongSelf stopSpin];
+            }];
+            [alertController addAction:cancel];
+            
+            [self presentViewController:alertController animated:YES completion:nil];
+        } else {
+            strongSelf.call = [TwilioVoice connectWithOptions:connectOptions delegate:strongSelf];
+        }
+    }];
+}
+
+- (void)checkRecordPermission:(void(^)(BOOL permissionGranted))completion {
+    AVAudioSessionRecordPermission permissionStatus = [[AVAudioSession sharedInstance] recordPermission];
+    switch (permissionStatus) {
+        case AVAudioSessionRecordPermissionGranted:
+            // Record permission already granted.
+            completion(YES);
+            break;
+        case AVAudioSessionRecordPermissionDenied:
+            // Record permission denied.
+            completion(NO);
+            break;
+        case AVAudioSessionRecordPermissionUndetermined:
+        {
+            // Requesting record permission.
+            // Optional: pop up app dialog to let the users know if they want to request.
+            [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                completion(granted);
+            }];
+            break;
+        }
+        default:
+            completion(NO);
+            break;
     }
 }
 
