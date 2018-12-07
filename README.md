@@ -535,7 +535,7 @@ An example of managing the `TVODefaultAudioDevice` while connecting a CallKit Ca
 See [CallKit Example](https://github.com/twilio/voice-quickstart-objc/blob/3.x/ObjCVoiceCallKitQuickstart/ViewController.m) for the complete implementation.
 
 #### <a name="microphone-permission"></a>Microphone Permission
-Unlike Voice iOS 2.X SDKs where microphone permission is not optional in Voice 3.X SDKs, the call will connect even when the microphone permission is denied or disabled by the user. To ensure the microphone permission is enabled prior to making or accepting a call you can add the following to request permission beforehand:
+Unlike Voice iOS 2.X SDKs where microphone permission is not optional in Voice 3.X SDKs, the call will connect even when the microphone permission is denied or disabled by the user. To ensure the microphone permission is enabled prior to making or accepting a call you can add the following to request the permission beforehand:
 
 ```
 - (void)makeCall {
