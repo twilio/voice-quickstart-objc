@@ -84,7 +84,8 @@ typedef void (^RingtonePlaybackCallback)(void);
 }
 
 - (void)makeCall:(NSString *)to {
-    TVOConnectOptions *connectOptions = [TVOConnectOptions optionsWithAccessToken:[self fetchAccessToken] block:^(TVOConnectOptionsBuilder *builder) {
+    TVOConnectOptions *connectOptions = [TVOConnectOptions optionsWithAccessToken:[self fetchAccessToken]
+                                                                            block:^(TVOConnectOptionsBuilder *builder) {
         builder.params = @{kTwimlParamTo: to};
     }];
 
@@ -97,14 +98,16 @@ typedef void (^RingtonePlaybackCallback)(void);
                                                                               preferredStyle:UIAlertControllerStyleAlert];
 
             UIAlertAction *continueWithoutMic = [UIAlertAction actionWithTitle:@"Continue without microphone"
-                                                                         style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                                                                         style:UIAlertActionStyleDefault
+                                                                       handler:^(UIAlertAction *action) {
                 strongSelf.call = [TwilioVoice connectWithOptions:connectOptions delegate:strongSelf];
             }];
             [alertController addAction:continueWithoutMic];
             
             NSDictionary *openURLOptions = @{UIApplicationOpenURLOptionUniversalLinksOnly: @NO};
             UIAlertAction *goToSettings = [UIAlertAction actionWithTitle:@"Settings"
-                                                                   style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                                                                   style:UIAlertActionStyleDefault
+                                                                 handler:^(UIAlertAction *action) {
                 [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]
                                                    options:openURLOptions
                                          completionHandler:nil];
@@ -112,7 +115,8 @@ typedef void (^RingtonePlaybackCallback)(void);
             [alertController addAction:goToSettings];
             
             UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel"
-                                                             style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                                                             style:UIAlertActionStyleCancel
+                                                           handler:^(UIAlertAction *action) {
                 [strongSelf toggleUIState:YES showCallControl:NO];
                 [strongSelf stopSpin];
             }];

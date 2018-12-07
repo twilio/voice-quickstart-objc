@@ -113,7 +113,8 @@ static NSString *const kTwimlParamTo = @"to";
 
                 typeof(self) __weak weakSelf = self;
                 UIAlertAction *continueWithoutMic = [UIAlertAction actionWithTitle:@"Continue without microphone"
-                                                                             style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                                                                             style:UIAlertActionStyleDefault
+                                                                           handler:^(UIAlertAction *action) {
                     typeof(self) __strong strongSelf = weakSelf;
                     [strongSelf performStartCallActionWithUUID:uuid handle:handle];
                 }];
@@ -121,7 +122,8 @@ static NSString *const kTwimlParamTo = @"to";
 
                 NSDictionary *openURLOptions = @{UIApplicationOpenURLOptionUniversalLinksOnly: @NO};
                 UIAlertAction *goToSettings = [UIAlertAction actionWithTitle:@"Settings"
-                                                                       style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                                                                       style:UIAlertActionStyleDefault
+                                                                     handler:^(UIAlertAction *action) {
                     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]
                                                        options:openURLOptions
                                              completionHandler:nil];
@@ -129,7 +131,8 @@ static NSString *const kTwimlParamTo = @"to";
                 [alertController addAction:goToSettings];
                 
                 UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel"
-                                                                 style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                                                                 style:UIAlertActionStyleCancel
+                                                               handler:^(UIAlertAction *action) {
                     typeof(self) __strong strongSelf = weakSelf;
                     [strongSelf toggleUIState:YES showCallControl:NO];
                     [strongSelf stopSpin];
