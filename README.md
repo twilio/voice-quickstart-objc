@@ -360,6 +360,7 @@ TVOCall *call = [TwilioVoice connectWithOptions:connectOptions delegate:self];
 
 ### <a name="preferred-audio-codec"></a>Preferred Audio Codec
 In Voice iOS 3.X, you can provide your preferred audio codec in the `TVOConnectOptions` and the `TVOAcceptOptions`.
+The only audio codec supported by our mobile infrastructure is currently PCMU. Opus is not currently available on our mobile infrastructure. However it will become available in Q1 of 2019. At that point the default audio codec for all 3.X mobile clients will be Opus. To always use PCMU as the negotiated audio codec instead you can add it as the first codec in the `preferAudioCodecs` list.
 
 ```.objc
 #import "TVOAudioCodec.h"
