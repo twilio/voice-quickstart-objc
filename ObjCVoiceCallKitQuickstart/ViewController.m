@@ -305,6 +305,8 @@ withCompletionHandler:(void (^)(void))completion {
 - (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
     NSLog(@"cancelledCallInviteReceived:");
     
+    [self incomingPushHandled];
+    
     if (!self.callInvite ||
         ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
         NSLog(@"No matching pending CallInvite. Ignoring the Cancelled CallInvite");
@@ -560,7 +562,6 @@ withCompletionHandler:(void (^)(void))completion {
         else {
             NSLog(@"Failed to report incoming call successfully: %@.", [error localizedDescription]);
         }
-        [self incomingPushHandled];
     }];
 }
 
@@ -575,7 +576,6 @@ withCompletionHandler:(void (^)(void))completion {
         else {
             NSLog(@"EndCallAction transaction request successful");
         }
-        [self incomingPushHandled];
     }];
 }
 
@@ -609,6 +609,7 @@ withCompletionHandler:(void (^)(void))completion {
     }
     
     self.callInvite = nil;
+    [self incomingPushHandled];
 }
 
 @end
