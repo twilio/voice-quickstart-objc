@@ -236,6 +236,7 @@ Voice iOS 3.X has a number of new features listed below:
 5. [Audio Device APIs](#audio-device-apis)
     * [Default Audio Device](#default-audio-device)
     * [Custom Audio Device](#custom-audio-device)
+6. [Preferred Audio Codec](#preferred-audio-codec)
 
 #### <a name="webrtc"></a>WebRTC
 The SDK is built using Chromium WebRTC for iOS. This ensures that over time developers will get the best real-time media streaming capabilities available for iOS. Additionally, upgrades to new versions of Chromium WebRTC will happen without changing the public API whenever possible.
@@ -355,6 +356,20 @@ id<TVOAudioDevice> audioDevice = [TVODefaultAudioDevice audioDeviceWithBlock:^ {
 TwilioVoice.audioDevice = audioDevice;
 
 TVOCall *call = [TwilioVoice connectWithOptions:connectOptions delegate:self];
+```
+
+### <a name="preferred-audio-codec"></a>Preferred Audio Codec
+In Voice iOS 3.X, you can provide your preferred audio codec in the `TVOConnectOptions` and the `TVOAcceptOptions`.
+
+```.objc
+#import "TVOAudioCodec.h"
+
+TVOConnectOptions *options = [TVOConnectOptions optionsWithAccessToken:accessToken
+                                                                 block:^(TVOConnectOptionsBuilder *builder) {
+    builder.preferredAudioCodecs = @[ [TVOOpusCodec new], [TVOPcmuCodec new] ];
+}];
+
+self.call = [TwilioVoice connectWithOptions:options delegate:self];
 ```
 
 ## Migration Guide
