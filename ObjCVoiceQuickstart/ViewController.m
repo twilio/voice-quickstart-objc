@@ -268,10 +268,12 @@ withCompletionHandler:(void (^)(void))completion {
     
     if (self.callInvite) {
         NSLog(@"A CallInvite is already in progress. Ignoring the incoming CallInvite from %@", callInvite.from);
+        [self incomingPushHandled];
         return;
     }
     if (self.call && self.call.state == TVOCallStateConnected) {
         NSLog(@"Already an active call. Ignoring incoming CallInvite from %@", callInvite.from);
+        [self incomingPushHandled];
         return;
     }
     
