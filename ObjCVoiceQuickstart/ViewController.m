@@ -21,6 +21,7 @@ static NSString *const kTwimlParamTo = @"to";
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
+@property (nonatomic, strong) void(^incomingPushCompletionCallback)(void);
 @property (nonatomic, strong) TVOCallInvite *callInvite;
 @property (nonatomic, strong) TVOCall *call;
 
@@ -244,13 +245,21 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
              forType:(PKPushType)type
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
+    // Save for later when the notification is properly handled.
+    self.incomingPushCompletionCallback = completion;
+
     if ([type isEqualToString:PKPushTypeVoIP]) {
         if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
     }
-    
-    completion();
+}
+
+- (void)incomingPushHandled {
+    if (self.incomingPushCompletionCallback) {
+        self.incomingPushCompletionCallback();
+        self.incomingPushCompletionCallback = nil;
+    }
 }
 
 #pragma mark - TVONotificationDelegate
@@ -330,10 +339,14 @@ withCompletionHandler:(void (^)(void))completion {
             NSLog(@"Failed to add notification request: %@", error);
         }];
     }
+    
+    [self incomingPushHandled];
 }
 
 - (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
     NSLog(@"cancelledCallInviteReceived:");
+    
+    [self incomingPushHandled];
     
     if (!self.callInvite ||
         ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
