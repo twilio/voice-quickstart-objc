@@ -348,8 +348,6 @@ withCompletionHandler:(void (^)(void))completion {
 - (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
     NSLog(@"cancelledCallInviteReceived:");
     
-    [self incomingPushHandled];
-    
     if (!self.callInvite ||
         ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
         NSLog(@"No matching pending CallInvite. Ignoring the Cancelled CallInvite");
@@ -372,6 +370,8 @@ withCompletionHandler:(void (^)(void))completion {
     self.callInvite = nil;
 
     [[UNUserNotificationCenter currentNotificationCenter] removeAllPendingNotificationRequests];
+    
+    [self incomingPushHandled];
 }
 
 #pragma mark - TVOCallDelegate
