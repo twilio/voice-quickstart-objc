@@ -23,6 +23,7 @@ static NSString *const kTwimlParamTo = @"to";
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
+@property (nonatomic, strong) void(^incomingPushCompletionCallback)(void);
 @property (nonatomic, strong) TVOCallInvite *callInvite;
 @property (nonatomic, strong) TVOCall *call;
 @property (nonatomic, strong) void(^callKitCompletionCallback)(BOOL);
@@ -265,15 +266,21 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
              forType:(PKPushType)type
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
+    // Save for later when the notification is properly handled.
+    self.incomingPushCompletionCallback = completion;
+
     if ([type isEqualToString:PKPushTypeVoIP]) {
         if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
     }
+}
 
-    dispatch_async(dispatch_get_main_queue(), ^{
-        completion();
-    });
+- (void)incomingPushHandled {
+    if (self.incomingPushCompletionCallback) {
+        self.incomingPushCompletionCallback();
+        self.incomingPushCompletionCallback = nil;
+    }
 }
 
 #pragma mark - TVONotificationDelegate
@@ -282,9 +289,11 @@ withCompletionHandler:(void (^)(void))completion {
     
     if (self.callInvite) {
         NSLog(@"A CallInvite is already in progress. Ignoring the incoming CallInvite from %@", callInvite.from);
+        [self incomingPushHandled];
         return;
     } else if (self.call) {
         NSLog(@"Already an active call. Ignoring the incoming CallInvite from %@", callInvite.from);
+        [self incomingPushHandled];
         return;
     }
 
@@ -295,6 +304,8 @@ withCompletionHandler:(void (^)(void))completion {
 
 - (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
     NSLog(@"cancelledCallInviteReceived:");
+    
+    [self incomingPushHandled];
     
     if (!self.callInvite ||
         ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
@@ -555,10 +566,6 @@ withCompletionHandler:(void (^)(void))completion {
 }
 
 - (void)performEndCallActionWithUUID:(NSUUID *)uuid {
-    if (uuid == nil) {
-        return;
-    }
-
     CXEndCallAction *endCallAction = [[CXEndCallAction alloc] initWithCallUUID:uuid];
     CXTransaction *transaction = [[CXTransaction alloc] initWithAction:endCallAction];
 
@@ -602,6 +609,7 @@ withCompletionHandler:(void (^)(void))completion {
     }
     
     self.callInvite = nil;
+    [self incomingPushHandled];
 }
 
 @end
