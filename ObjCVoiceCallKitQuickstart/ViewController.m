@@ -28,6 +28,7 @@ static NSString *const kTwimlParamTo = @"to";
 
 @property (nonatomic, strong) CXProvider *callKitProvider;
 @property (nonatomic, strong) CXCallController *callKitCallController;
+@property (nonatomic, assign) BOOL userInitiatedDisconnect;
 
 @property (nonatomic, weak) IBOutlet UIImageView *iconView;
 @property (nonatomic, assign, getter=isSpinning) BOOL spinning;
@@ -92,6 +93,7 @@ static NSString *const kTwimlParamTo = @"to";
 
 - (IBAction)placeCall:(id)sender {
     if (self.call && self.call.state == TVOCallStateConnected) {
+        self.userInitiatedDisconnect = YES;
         [self performEndCallActionWithUUID:self.call.uuid];
         [self toggleUIState:NO showCallControl:NO];
     } else {
@@ -266,12 +268,22 @@ withCompletionHandler:(void (^)(void))completion {
         NSLog(@"Call disconnected");
     }
 
+    if (!self.userInitiatedDisconnect) {
+        CXCallEndedReason reason = CXCallEndedReasonRemoteEnded;
+        if (error) {
+            reason = CXCallEndedReasonFailed;
+        }
+        
+        [self.callKitProvider reportCallWithUUID:call.uuid endedAtDate:[NSDate date] reason:reason];
+    }
+
     [self callDisconnected];
 }
 
 - (void)callDisconnected {
     self.call = nil;
     self.callKitCompletionCallback = nil;
+    self.userInitiatedDisconnect = NO;
     
     [self stopSpin];
     [self toggleUIState:YES showCallControl:NO];
