@@ -20,6 +20,7 @@ static NSString *const kTwimlParamTo = @"to";
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
+@property (nonatomic, strong) void(^incomingPushCompletionCallback)(void);
 @property (nonatomic, strong) TVOCallInvite *callInvite;
 @property (nonatomic, strong) TVOCall *call;
 
@@ -174,12 +175,21 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
              forType:(PKPushType)type
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
+
+    // Save for later when the notification is properly handled.
+    self.incomingPushCompletionCallback = completion;
+
     if ([type isEqualToString:PKPushTypeVoIP]) {
         [TwilioVoice handleNotification:payload.dictionaryPayload
                                delegate:self];
     }
-    
-    completion();
+}
+
+- (void)incomingPushHandled {
+    if (self.incomingPushCompletionCallback) {
+        self.incomingPushCompletionCallback();
+        self.incomingPushCompletionCallback = nil;
+    }
 }
 
 #pragma mark - TVONotificationDelegate
@@ -196,10 +206,12 @@ withCompletionHandler:(void (^)(void))completion {
     
     if (self.callInvite && self.callInvite.state == TVOCallInviteStatePending) {
         NSLog(@"Already a pending call invite. Ignoring incoming call invite from %@", callInvite.from);
+        [self incomingPushHandled];
         return;
     }
     if (self.call && self.call.state == TVOCallStateConnected) {
         NSLog(@"Already an active call. Ignoring incoming call invite from %@", callInvite.from);
+        [self incomingPushHandled];
         return;
     }
     
@@ -258,6 +270,8 @@ withCompletionHandler:(void (^)(void))completion {
 
         [app presentLocalNotificationNow:notification];
     }
+
+    [self incomingPushHandled];
 }
 
 - (void)handleCallInviteCanceled:(TVOCallInvite *)callInvite {
@@ -284,6 +298,8 @@ withCompletionHandler:(void (^)(void))completion {
     self.callInvite = nil;
 
     [[UIApplication sharedApplication] cancelAllLocalNotifications];
+
+    [self incomingPushHandled];
 }
 
 - (void)notificationError:(NSError *)error {

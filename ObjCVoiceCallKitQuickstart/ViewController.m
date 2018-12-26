@@ -22,6 +22,7 @@ static NSString *const kTwimlParamTo = @"to";
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
+@property (nonatomic, strong) void(^incomingPushCompletionCallback)(void);
 @property (nonatomic, strong) TVOCallInvite *callInvite;
 @property (nonatomic, strong) TVOCall *call;
 @property (nonatomic, strong) void(^callKitCompletionCallback)(BOOL);
@@ -192,12 +193,21 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
              forType:(PKPushType)type
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
+
+    // Save for later when the notification is properly handled.
+    self.incomingPushCompletionCallback = completion;
+
     if ([type isEqualToString:PKPushTypeVoIP]) {
         [TwilioVoice handleNotification:payload.dictionaryPayload
                                delegate:self];
     }
+}
 
-    completion();
+- (void)incomingPushHandled {
+    if (self.incomingPushCompletionCallback) {
+        self.incomingPushCompletionCallback();
+        self.incomingPushCompletionCallback = nil;
+    }
 }
 
 #pragma mark - TVONotificationDelegate
@@ -215,10 +225,12 @@ withCompletionHandler:(void (^)(void))completion {
     if (self.callInvite && self.callInvite == TVOCallInviteStatePending) {
         NSLog(@"Already a pending incoming call invite.");
         NSLog(@"  >> Ignoring call from %@", callInvite.from);
+        [self incomingPushHandled];
         return;
     } else if (self.call) {
         NSLog(@"Already an active call.");
         NSLog(@"  >> Ignoring call from %@", callInvite.from);
+        [self incomingPushHandled];
         return;
     }
 
@@ -231,8 +243,8 @@ withCompletionHandler:(void (^)(void))completion {
     NSLog(@"callInviteCanceled:");
 
     [self performEndCallActionWithUUID:callInvite.uuid];
-
     self.callInvite = nil;
+    [self incomingPushHandled];
 }
 
 - (void)notificationError:(NSError *)error {
@@ -520,6 +532,7 @@ withCompletionHandler:(void (^)(void))completion {
     self.call = [self.callInvite acceptWithDelegate:self];
     self.callInvite = nil;
     self.callKitCompletionCallback = completionHandler;
+    [self incomingPushHandled];
 }
 
 @end
