@@ -239,10 +239,10 @@ withCompletionHandler:(void (^)(void))completion {
 
 - (void)handleCallInviteCanceled:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteCanceled:");
-    
-    [self incomingPushHandled];
+
     [self performEndCallActionWithUUID:callInvite.uuid];
     self.callInvite = nil;
+    [self incomingPushHandled];
 }
 
 - (void)notificationError:(NSError *)error {
@@ -519,8 +519,8 @@ withCompletionHandler:(void (^)(void))completion {
 
     self.call = [self.callInvite acceptWithDelegate:self];
     self.callInvite = nil;
-    [self incomingPushHandled];
     self.callKitCompletionCallback = completionHandler;
+    [self incomingPushHandled];
 }
 
 @end
