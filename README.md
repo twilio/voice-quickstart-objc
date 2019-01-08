@@ -8,8 +8,8 @@
 * [New Features](#new-features) - New features in 3.X
 * [Migration Guide](#migration-guide) - Migrating from 2.X to 3.X
 * [Access Tokens](#access-tokens) - Using access tokens
-* [Managing Push Credentials](#managing-push-credentials) - Managing push credentials
 * [Managing Audio Interruptions](#managing-audio-interruptions) - Managing audio interruptions
+* [Managing Push Credentials](#managing-push-credentials) - Managing push credentials
 * [More Documentation](#more-documentation) - More documentation related to the Voice iOS SDK
 * [Issues and Support](#issues-and-support) - Filing issues and general support
 
