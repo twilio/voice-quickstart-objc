@@ -1,5 +1,7 @@
 # Twilio Voice Objective-C Quickstart for iOS
 
+> Active development will soon will be shifted from 2.x to the 3.x Programmable Voice SDK. Please follow the [migration guide](https://github.com/twilio/voice-quickstart-objc/tree/3.x#migration-guide) and the [new features](https://github.com/twilio/voice-quickstart-objc/tree/3.x#new-features) to upgrade your applications with the latest APIs.
+
 ## Get started with Voice on iOS:
 * [Quickstart](#quickstart) - Run the quickstart app
 * [Access Tokens](#access-tokens) - Using access tokens
