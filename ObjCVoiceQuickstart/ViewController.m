@@ -418,7 +418,7 @@ withCompletionHandler:(void (^)(void))completion {
     TVODefaultAudioDevice *audioDevice = (TVODefaultAudioDevice *)TwilioVoice.audioDevice;
     audioDevice.block =  ^ {
         // We will execute `kDefaultAVAudioSessionConfigurationBlock` first.
-        kDefaultAVAudioSessionConfigurationBlock();
+        kTVODefaultAVAudioSessionConfigurationBlock();
         
         // Overwrite the audio route
         AVAudioSession *session = [AVAudioSession sharedInstance];
