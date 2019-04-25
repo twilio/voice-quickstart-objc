@@ -375,7 +375,7 @@ withCompletionHandler:(void (^)(void))completion {
     // The mode set by the Voice SDK is "VoiceChat" so the default audio route is the built-in receiver. Use port override to switch the route.
     self.audioDevice.block =  ^ {
         // We will execute `kDefaultAVAudioSessionConfigurationBlock` first.
-        kDefaultAVAudioSessionConfigurationBlock();
+        kTVODefaultAVAudioSessionConfigurationBlock();
         
         // Overwrite the audio route
         AVAudioSession *session = [AVAudioSession sharedInstance];
