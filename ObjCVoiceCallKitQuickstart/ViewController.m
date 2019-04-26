@@ -266,6 +266,7 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
              forType:(PKPushType)type
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
+
     // Save for later when the notification is properly handled.
     self.incomingPushCompletionCallback = completion;
 
@@ -316,6 +317,7 @@ withCompletionHandler:(void (^)(void))completion {
     [self performEndCallActionWithUUID:self.callInvite.uuid];
 
     self.callInvite = nil;
+    [self incomingPushHandled];
 }
 
 #pragma mark - TVOCallDelegate
@@ -347,7 +349,7 @@ withCompletionHandler:(void (^)(void))completion {
     } else {
         NSLog(@"Call disconnected");
     }
-    
+
     if (!self.userInitiatedDisconnect) {
         CXCallEndedReason reason = CXCallEndedReasonRemoteEnded;
         if (error) {

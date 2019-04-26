@@ -245,6 +245,7 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
              forType:(PKPushType)type
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
+
     // Save for later when the notification is properly handled.
     self.incomingPushCompletionCallback = completion;
 
@@ -341,7 +342,7 @@ withCompletionHandler:(void (^)(void))completion {
             NSLog(@"Failed to add notification request: %@", error);
         }];
     }
-    
+
     [self incomingPushHandled];
 }
 
