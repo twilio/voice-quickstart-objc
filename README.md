@@ -1,6 +1,6 @@
 # Twilio Voice Objective-C Quickstart for iOS
 
-> NOTE: These sample applications use the Twilio Voice 2.x APIs. For examples using our 3.x APIs, please see the [master](https://github.com/twilio/voice-quickstart-objc/tree/master) branch.
+> NOTE: These sample applications use the Twilio Voice 2.x APIs. If you are using SDK 2.x, we highly recommend planning your migration to 3.0 as soon as possible. Support for 2.x will cease 1/1/2020. Until then, SDK 2.x will only receive fixes for critical or security related issues. For examples using our 3.x APIs, please see the [master](https://github.com/twilio/voice-quickstart-objc/tree/master) branch.
 
 ## Get started with Voice on iOS:
 * [Quickstart](#quickstart) - Run the quickstart app
