@@ -8,6 +8,7 @@
 #import "AppDelegate.h"
 
 @import TwilioVoice;
+@import UserNotifications;
 
 @interface AppDelegate ()
 @end
@@ -15,8 +16,8 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    NSLog(@"Twilio Voice Version: %@", [TwilioVoice version]);
-    [self configureUserNotifications];
+    NSLog(@"Twilio Voice Version: %@", [TwilioVoice sdkVersion]);
+    [self requestNotificationPermission];
 
     return YES;
 }
@@ -43,31 +44,28 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
-- (void)configureUserNotifications {
-    UIMutableUserNotificationAction *rejectAction = [[UIMutableUserNotificationAction alloc] init];
-    [rejectAction setActivationMode:UIUserNotificationActivationModeBackground];
-    [rejectAction setTitle:@"Reject"];
-    [rejectAction setIdentifier:@"reject"];
-    [rejectAction setDestructive:YES];
-    [rejectAction setAuthenticationRequired:NO];
-
-    UIMutableUserNotificationAction *acceptAction = [[UIMutableUserNotificationAction alloc] init];
-    [acceptAction setActivationMode:UIUserNotificationActivationModeBackground];
-    [acceptAction setTitle:@"Accept"];
-    [acceptAction setIdentifier:@"accept"];
-    [acceptAction setDestructive:NO];
-    [acceptAction setAuthenticationRequired:NO];
-
-    UIMutableUserNotificationCategory *actionCategory = [[UIMutableUserNotificationCategory alloc] init];
-    [actionCategory setIdentifier:@"ACTIONABLE"];
-    [actionCategory setActions:@[rejectAction, acceptAction]
-                    forContext:UIUserNotificationActionContextDefault];
-
-    [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|
-                                                                                                                     UIUserNotificationTypeBadge|
-                                                                                                                     UIUserNotificationTypeSound
-                                                                                                          categories:[NSSet setWithObject:actionCategory]]];
-
+- (void)requestNotificationPermission {
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *settings) {
+        if (settings.authorizationStatus == UNAuthorizationStatusDenied) {
+            NSLog(@"User notification permission denied. Go to system settings to allow user notifications.");
+        } else if (settings.authorizationStatus == UNAuthorizationStatusAuthorized) {
+            NSLog(@"User notificaiton already authorized.");
+        } else if (settings.authorizationStatus == UNAuthorizationStatusNotDetermined) {
+            UNAuthorizationOptions options = UNAuthorizationOptionAlert;
+            [center requestAuthorizationWithOptions:options completionHandler:^(BOOL granted, NSError *error) {
+                if (error) {
+                    NSLog(@"Failed to request for user notification permission: %@", error);
+                }
+                
+                if (granted) {
+                    NSLog(@"User notification permission granted.");
+                } else {
+                    NSLog(@"User notification permission denied.");
+                }
+            }];
+        }
+    }];
 }
 
 @end

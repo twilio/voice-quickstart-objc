@@ -10,6 +10,7 @@
 @import AVFoundation;
 @import PushKit;
 @import TwilioVoice;
+@import UserNotifications;
 
 static NSString *const kYourServerBaseURLString = <#URL TO YOUR ACCESS TOKEN SERVER#>;
 static NSString *const kAccessTokenEndpoint = @"/accessToken";
@@ -44,8 +45,6 @@ typedef void (^RingtonePlaybackCallback)(void);
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    [TwilioVoice setLogLevel:TVOLogLevelVerbose];
 
     self.voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     self.voipRegistry.delegate = self;
@@ -77,13 +76,83 @@ typedef void (^RingtonePlaybackCallback)(void);
         __weak typeof(self) weakSelf = self;
         [self playOutgoingRingtone:^{
             __strong typeof(self) strongSelf = weakSelf;
-            strongSelf.call = [TwilioVoice call:[strongSelf fetchAccessToken]
-                                         params:@{kTwimlParamTo: self.outgoingValue.text}
-                                       delegate:strongSelf];
+            [strongSelf makeCall:strongSelf.outgoingValue.text];
         }];
         
         [self toggleUIState:NO showCallControl:NO];
         [self startSpin];
+    }
+}
+
+- (void)makeCall:(NSString *)to {
+    TVOConnectOptions *connectOptions = [TVOConnectOptions optionsWithAccessToken:[self fetchAccessToken]
+                                                                            block:^(TVOConnectOptionsBuilder *builder) {
+        builder.params = @{kTwimlParamTo: to};
+    }];
+
+    typeof(self) __weak weakSelf = self;
+    [self checkRecordPermission:^(BOOL permissionGranted) {
+        typeof(self) __strong strongSelf = weakSelf;
+        if (!permissionGranted) {
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Voice Quick Start"
+                                                                                     message:@"Microphone permission not granted."
+                                                                              preferredStyle:UIAlertControllerStyleAlert];
+
+            UIAlertAction *continueWithoutMic = [UIAlertAction actionWithTitle:@"Continue without microphone"
+                                                                         style:UIAlertActionStyleDefault
+                                                                       handler:^(UIAlertAction *action) {
+                strongSelf.call = [TwilioVoice connectWithOptions:connectOptions delegate:strongSelf];
+            }];
+            [alertController addAction:continueWithoutMic];
+            
+            NSDictionary *openURLOptions = @{UIApplicationOpenURLOptionUniversalLinksOnly: @NO};
+            UIAlertAction *goToSettings = [UIAlertAction actionWithTitle:@"Settings"
+                                                                   style:UIAlertActionStyleDefault
+                                                                 handler:^(UIAlertAction *action) {
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]
+                                                   options:openURLOptions
+                                         completionHandler:nil];
+            }];
+            [alertController addAction:goToSettings];
+            
+            UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"Cancel"
+                                                             style:UIAlertActionStyleCancel
+                                                           handler:^(UIAlertAction *action) {
+                [strongSelf toggleUIState:YES showCallControl:NO];
+                [strongSelf stopSpin];
+            }];
+            [alertController addAction:cancel];
+            
+            [self presentViewController:alertController animated:YES completion:nil];
+        } else {
+            strongSelf.call = [TwilioVoice connectWithOptions:connectOptions delegate:strongSelf];
+        }
+    }];
+}
+
+- (void)checkRecordPermission:(void(^)(BOOL permissionGranted))completion {
+    AVAudioSessionRecordPermission permissionStatus = [[AVAudioSession sharedInstance] recordPermission];
+    switch (permissionStatus) {
+        case AVAudioSessionRecordPermissionGranted:
+            // Record permission already granted.
+            completion(YES);
+            break;
+        case AVAudioSessionRecordPermissionDenied:
+            // Record permission denied.
+            completion(NO);
+            break;
+        case AVAudioSessionRecordPermissionUndetermined:
+        {
+            // Requesting record permission.
+            // Optional: pop up app dialog to let the users know if they want to request.
+            [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                completion(granted);
+            }];
+            break;
+        }
+        default:
+            completion(NO);
+            break;
     }
 }
 
@@ -161,8 +230,9 @@ typedef void (^RingtonePlaybackCallback)(void);
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [TwilioVoice handleNotification:payload.dictionaryPayload
-                               delegate:self];
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+            NSLog(@"This is not a valid Twilio Voice notification.");
+        }
     }
 }
 
@@ -180,8 +250,9 @@ withCompletionHandler:(void (^)(void))completion {
     self.incomingPushCompletionCallback = completion;
 
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        [TwilioVoice handleNotification:payload.dictionaryPayload
-                               delegate:self];
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+            NSLog(@"This is not a valid Twilio Voice notification.");
+        }
     }
 }
 
@@ -194,23 +265,15 @@ withCompletionHandler:(void (^)(void))completion {
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
-    if (callInvite.state == TVOCallInviteStatePending) {
-        [self handleCallInviteReceived:callInvite];
-    } else if (callInvite.state == TVOCallInviteStateCanceled) {
-        [self handleCallInviteCanceled:callInvite];
-    }
-}
-
-- (void)handleCallInviteReceived:(TVOCallInvite *)callInvite {
     NSLog(@"callInviteReceived:");
     
-    if (self.callInvite && self.callInvite.state == TVOCallInviteStatePending) {
-        NSLog(@"Already a pending call invite. Ignoring incoming call invite from %@", callInvite.from);
+    if (self.callInvite) {
+        NSLog(@"A CallInvite is already in progress. Ignoring the incoming CallInvite from %@", callInvite.from);
         [self incomingPushHandled];
         return;
     }
     if (self.call && self.call.state == TVOCallStateConnected) {
-        NSLog(@"Already an active call. Ignoring incoming call invite from %@", callInvite.from);
+        NSLog(@"Already an active call. Ignoring incoming CallInvite from %@", callInvite.from);
         [self incomingPushHandled];
         return;
     }
@@ -251,7 +314,8 @@ withCompletionHandler:(void (^)(void))completion {
     UIAlertAction *accept = [UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         typeof(self) __strong strongSelf = weakSelf;
         [strongSelf stopIncomingRingtone];
-        strongSelf.call = [callInvite acceptWithDelegate:strongSelf];
+        TVOAcceptOptions *acceptOptions = [TVOAcceptOptions optionsWithCallInvite:strongSelf.callInvite];
+        strongSelf.call = [callInvite acceptWithOptions:acceptOptions delegate:strongSelf];
         strongSelf.callInvite = nil;
 
         strongSelf.incomingAlertController = nil;
@@ -264,21 +328,30 @@ withCompletionHandler:(void (^)(void))completion {
 
     // If the application is not in the foreground, post a local notification
     if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateActive) {
-        UIApplication* app = [UIApplication sharedApplication];
-        UILocalNotification* notification = [[UILocalNotification alloc] init];
-        notification.alertBody = [NSString stringWithFormat:@"Incoming Call from %@", callInvite.from];
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+        content.title = @"Incoming Call";
+        content.body = [NSString stringWithFormat:@"Call Invite from %@", callInvite.from];
+        content.sound = [UNNotificationSound defaultSound];
 
-        [app presentLocalNotificationNow:notification];
+        UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:@"VoiceLocaNotification"
+                                                                              content:content
+                                                                              trigger:nil];
+        
+        [center addNotificationRequest:request withCompletionHandler:^(NSError *error) {
+            NSLog(@"Failed to add notification request: %@", error);
+        }];
     }
 
     [self incomingPushHandled];
 }
 
-- (void)handleCallInviteCanceled:(TVOCallInvite *)callInvite {
-    NSLog(@"callInviteCanceled:");
+- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
+    NSLog(@"cancelledCallInviteReceived:");
     
-    if (![callInvite.callSid isEqualToString:self.callInvite.callSid]) {
-        NSLog(@"Incoming (but not current) call invite from \"%@\" canceled. Just ignore it.", callInvite.from);
+    if (!self.callInvite ||
+        ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
+        NSLog(@"No matching pending CallInvite. Ignoring the Cancelled CallInvite");
         return;
     }
     
@@ -297,13 +370,9 @@ withCompletionHandler:(void (^)(void))completion {
     
     self.callInvite = nil;
 
-    [[UIApplication sharedApplication] cancelAllLocalNotifications];
-
+    [[UNUserNotificationCenter currentNotificationCenter] removeAllPendingNotificationRequests];
+    
     [self incomingPushHandled];
-}
-
-- (void)notificationError:(NSError *)error {
-    NSLog(@"notificationError: %@", [error localizedDescription]);
 }
 
 #pragma mark - TVOCallDelegate
@@ -347,16 +416,25 @@ withCompletionHandler:(void (^)(void))completion {
 #pragma mark - AVAudioSession
 - (void)toggleAudioRoute:(BOOL)toSpeaker {
     // The mode set by the Voice SDK is "VoiceChat" so the default audio route is the built-in receiver. Use port override to switch the route.
-    NSError *error = nil;
-    if (toSpeaker) {
-        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&error]) {
-            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+    TVODefaultAudioDevice *audioDevice = (TVODefaultAudioDevice *)TwilioVoice.audioDevice;
+    audioDevice.block =  ^ {
+        // We will execute `kDefaultAVAudioSessionConfigurationBlock` first.
+        kTVODefaultAVAudioSessionConfigurationBlock();
+        
+        // Overwrite the audio route
+        AVAudioSession *session = [AVAudioSession sharedInstance];
+        NSError *error = nil;
+        if (toSpeaker) {
+            if (![session overrideOutputAudioPort:AVAudioSessionPortOverrideSpeaker error:&error]) {
+                NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+            }
+        } else {
+            if (![session overrideOutputAudioPort:AVAudioSessionPortOverrideNone error:&error]) {
+                NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
+            }
         }
-    } else {
-        if (![[AVAudioSession sharedInstance] overrideOutputAudioPort:AVAudioSessionPortOverrideNone error:&error]) {
-            NSLog(@"Unable to reroute audio: %@", [error localizedDescription]);
-        }
-    }
+    };
+    audioDevice.block();
 }
 
 #pragma mark - Ringtone player & AVAudioPlayerDelegate
