@@ -131,7 +131,7 @@ TVOCall *call = [TwilioVoice connectWithOptions:connectOptions delegate:self];
 ```
 
 ### <a name="preferred-audio-codec"></a>Preferred Audio Codec
-You can provide your preferred audio codecs in the `TVOConnectOptions` and the `TVOAcceptOptions`. Opus is the default codec used by the mobile infrastructure. To use PCMU as the negotiated audio codec instead of Opus you can add it as the first codec in the `preferAudioCodecs` list.
+You can provide your preferred audio codecs in the `TVOConnectOptions` and the `TVOAcceptOptions`. Opus is the default codec used by the mobile infrastructure. To use PCMU as the negotiated audio codec instead of Opus you can add it as the first codec in the `preferredAudioCodecs` list.
 
 ```.objc
 #import "TVOAudioCodec.h"
