@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say>Hello, welcome to twilio.</Say>
+    <Dial callerId="{{phoneNumber}}">
+        {{#to}}
+        <Number>{{.}}</Number>
+        {{/to}}
+    </Dial>
+</Response>
