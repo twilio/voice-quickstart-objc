@@ -321,6 +321,12 @@ withCompletionHandler:(void (^)(void))completion {
 }
 
 #pragma mark - TVOCallDelegate
+- (void)callDidStartRinging:(TVOCall *)call {
+    NSLog(@"callDidStartRinging:");
+    
+    [self.placeCallButton setTitle:@"Ringing" forState:UIControlStateNormal];
+}
+
 - (void)callDidConnect:(TVOCall *)call {
     NSLog(@"callDidConnect:");
 
@@ -333,6 +339,20 @@ withCompletionHandler:(void (^)(void))completion {
     [self toggleUIState:YES showCallControl:YES];
     [self stopSpin];
     [self toggleAudioRoute:YES];
+}
+
+- (void)call:(TVOCall *)call isReconnectingWithError:(NSError *)error {
+    NSLog(@"Call is reconnecting");
+    
+    [self.placeCallButton setTitle:@"Reconnecting" forState:UIControlStateNormal];
+    [self toggleUIState:NO showCallControl:NO];
+}
+
+- (void)callDidReconnect:(TVOCall *)call {
+    NSLog(@"Call reconnected");
+    
+    [self.placeCallButton setTitle:@"Hang Up" forState:UIControlStateNormal];
+    [self toggleUIState:YES showCallControl:YES];
 }
 
 - (void)call:(TVOCall *)call didFailToConnectWithError:(NSError *)error {

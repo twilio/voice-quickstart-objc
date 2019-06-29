@@ -315,7 +315,7 @@ Please ensure that after deleting the Push Credential you remove or replace the 
 You can find more documentation on getting started as well as our latest AppleDoc below:
 
 * [Getting Started](https://www.twilio.com/docs/api/voice-sdk/ios/getting-started)
-* [AppleDoc](https://media.twiliocdn.com/sdk/ios/voice/latest/docs)
+* [AppleDoc](https://twilio.github.io/twilio-voice-ios/docs/latest/)
 
 
 ## Twilio Helper Libraries
