@@ -22,7 +22,6 @@ static NSString *const kTwimlParamTo = @"to";
 @property (nonatomic, strong) NSString *deviceTokenString;
 
 @property (nonatomic, strong) PKPushRegistry *voipRegistry;
-@property (nonatomic, strong) void(^incomingPushCompletionCallback)(void);
 @property (nonatomic, strong) TVOCallInvite *callInvite;
 @property (nonatomic, strong) TVOCall *call;
 @property (nonatomic, strong) void(^callKitCompletionCallback)(BOOL);
@@ -135,7 +134,11 @@ static NSString *const kTwimlParamTo = @"to";
     NSLog(@"pushRegistry:didUpdatePushCredentials:forType:");
 
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        self.deviceTokenString = [credentials.token description];
+        const unsigned *tokenBytes = [credentials.token bytes];
+        self.deviceTokenString = [NSString stringWithFormat:@"<%08x %08x %08x %08x %08x %08x %08x %08x>",
+                                  ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
+                                  ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
+                                  ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
         NSString *accessToken = [self fetchAccessToken];
 
         [TwilioVoice registerWithAccessToken:accessToken
@@ -194,27 +197,33 @@ didReceiveIncomingPushWithPayload:(PKPushPayload *)payload
 withCompletionHandler:(void (^)(void))completion {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:withCompletionHandler:");
 
-    // Save for later when the notification is properly handled.
-    self.incomingPushCompletionCallback = completion;
-
     if ([type isEqualToString:PKPushTypeVoIP]) {
         [TwilioVoice handleNotification:payload.dictionaryPayload
                                delegate:self];
     }
-}
-
-- (void)incomingPushHandled {
-    if (self.incomingPushCompletionCallback) {
-        self.incomingPushCompletionCallback();
-        self.incomingPushCompletionCallback = nil;
-    }
+    
+    /**
+     * The Voice SDK processes the call notification and returns the call invite synchronously. Report the incoming call to
+     * CallKit and fulfill the completion before exiting this callback method.
+    */
+    completion();
 }
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
     if (callInvite.state == TVOCallInviteStatePending) {
+        /**
+         * Calling `[TwilioVoice handleNotification:]` will synchronously process your notification payload and
+         * provide you a `TVOCallInvite` object with `TVOCallInviteStatePending` state.
+         * Report the incoming call to CallKit upon receiving this callback.
+         */
         [self handleCallInviteReceived:callInvite];
     } else if (callInvite.state == TVOCallInviteStateCanceled) {
+        /**
+         * The SDK may call `[TVONotificationDelegate callInviteReceived:]` asynchronously on the main dispatch queue
+         * with a `TVOCallInvite` state of `TVOCallInviteStateCanceled` if the caller hangs up or the client
+         * encounters any other error before the called party could answer or reject the call.
+         */
         [self handleCallInviteCanceled:callInvite];
     }
 }
@@ -225,12 +234,10 @@ withCompletionHandler:(void (^)(void))completion {
     if (self.callInvite && self.callInvite == TVOCallInviteStatePending) {
         NSLog(@"Already a pending incoming call invite.");
         NSLog(@"  >> Ignoring call from %@", callInvite.from);
-        [self incomingPushHandled];
         return;
     } else if (self.call) {
         NSLog(@"Already an active call.");
         NSLog(@"  >> Ignoring call from %@", callInvite.from);
-        [self incomingPushHandled];
         return;
     }
 
@@ -244,7 +251,6 @@ withCompletionHandler:(void (^)(void))completion {
 
     [self performEndCallActionWithUUID:callInvite.uuid];
     self.callInvite = nil;
-    [self incomingPushHandled];
 }
 
 - (void)notificationError:(NSError *)error {
@@ -532,7 +538,6 @@ withCompletionHandler:(void (^)(void))completion {
     self.call = [self.callInvite acceptWithDelegate:self];
     self.callInvite = nil;
     self.callKitCompletionCallback = completionHandler;
-    [self incomingPushHandled];
 }
 
 @end
