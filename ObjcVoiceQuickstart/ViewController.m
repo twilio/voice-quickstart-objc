@@ -274,31 +274,35 @@ withCompletionHandler:(void (^)(void))completion {
     // Save for later when the notification is properly handled.
     self.incomingPushCompletionCallback = completion;
 
+    
     if ([type isEqualToString:PKPushTypeVoIP]) {
         if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self delegateQueue:nil]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
     }
-}
-
-- (void)incomingPushHandled {
-    if (self.incomingPushCompletionCallback) {
-        self.incomingPushCompletionCallback();
-        self.incomingPushCompletionCallback = nil;
-    }
+    
+    /**
+     * The Voice SDK processes the call notification and returns the call invite synchronously. Report the incoming call to
+     * CallKit and fulfill the completion before exiting this callback method.
+    */
+    completion();
 }
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
-    NSLog(@"callInviteReceived:");
     
+    /**
+     * Calling `[TwilioVoice handleNotification:delegate:]` will synchronously process your notification payload and
+     * provide you a `TVOCallInvite` object. Report the incoming call to CallKit upon receiving this callback.
+     */
+
+    NSLog(@"callInviteReceived:");
+
     if (self.callInvite) {
         NSLog(@"A CallInvite is already in progress. Ignoring the incoming CallInvite from %@", callInvite.from);
-        [self incomingPushHandled];
         return;
     } else if (self.call) {
         NSLog(@"Already an active call. Ignoring the incoming CallInvite from %@", callInvite.from);
-        [self incomingPushHandled];
         return;
     }
 
@@ -312,9 +316,14 @@ withCompletionHandler:(void (^)(void))completion {
 }
 
 - (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite error:(NSError *)error {
-    NSLog(@"cancelledCallInviteReceived:");
     
-    [self incomingPushHandled];
+    /**
+     * The SDK may call `[TVONotificationDelegate callInviteReceived:error:]` asynchronously on the dispatch queue
+     * with a `TVOCancelledCallInvite` if the caller hangs up or the client encounters any other error before the called
+     * party could answer or reject the call.
+     */
+    
+    NSLog(@"cancelledCallInviteReceived:");
     
     if (!self.callInvite ||
         ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
@@ -325,7 +334,6 @@ withCompletionHandler:(void (^)(void))completion {
     [self performEndCallActionWithUUID:self.callInvite.uuid];
 
     self.callInvite = nil;
-    [self incomingPushHandled];
 }
 
 #pragma mark - TVOCallDelegate
@@ -639,7 +647,6 @@ withCompletionHandler:(void (^)(void))completion {
     }
     
     self.callInvite = nil;
-    [self incomingPushHandled];
 }
 
 @end
