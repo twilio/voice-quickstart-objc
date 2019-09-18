@@ -9,9 +9,4 @@ abstract_target 'TwilioVoice' do
     platform :ios, '10.0'
     project 'ObjCVoiceQuickstart.xcproject'
   end
-
-  target 'ObjCVoiceCallKitQuickstart' do
-    platform :ios, '10.0'
-    project 'ObjCVoiceCallKitQuickstart.xcproject'
-  end
 end

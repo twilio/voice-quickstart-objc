@@ -17,7 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		2459FDC61D83664300917CA9 /* ObjCVoiceCallKitQuickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ObjCVoiceCallKitQuickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2459FDC61D83664300917CA9 /* ObjCVoiceQuickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ObjCVoiceQuickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2459FDCA1D83664300917CA9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2459FDCC1D83664300917CA9 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		2459FDCD1D83664300917CA9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -27,7 +27,7 @@
 		2459FDD51D83664300917CA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2459FDD81D83664300917CA9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2459FDDA1D83664300917CA9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		24BA34241D87269500B0B4F7 /* ObjCVoiceCallKitQuickstart.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ObjCVoiceCallKitQuickstart.entitlements; sourceTree = "<group>"; };
+		24BA34241D87269500B0B4F7 /* ObjCVoiceQuickstart.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ObjCVoiceQuickstart.entitlements; sourceTree = "<group>"; };
 		24BA34281D87431000B0B4F7 /* TwilioLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TwilioLogo.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -45,7 +45,7 @@
 		2459FDBD1D83664300917CA9 = {
 			isa = PBXGroup;
 			children = (
-				2459FDC81D83664300917CA9 /* ObjCVoiceCallKitQuickstart */,
+				2459FDC81D83664300917CA9 /* ObjCVoiceQuickstart */,
 				2459FDC71D83664300917CA9 /* Products */,
 				5FF12A4D246637936B670360 /* Frameworks */,
 			);
@@ -54,15 +54,15 @@
 		2459FDC71D83664300917CA9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2459FDC61D83664300917CA9 /* ObjCVoiceCallKitQuickstart.app */,
+				2459FDC61D83664300917CA9 /* ObjCVoiceQuickstart.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		2459FDC81D83664300917CA9 /* ObjCVoiceCallKitQuickstart */ = {
+		2459FDC81D83664300917CA9 /* ObjCVoiceQuickstart */ = {
 			isa = PBXGroup;
 			children = (
-				24BA34241D87269500B0B4F7 /* ObjCVoiceCallKitQuickstart.entitlements */,
+				24BA34241D87269500B0B4F7 /* ObjCVoiceQuickstart.entitlements */,
 				2459FDCC1D83664300917CA9 /* AppDelegate.h */,
 				2459FDCD1D83664300917CA9 /* AppDelegate.m */,
 				2459FDCF1D83664300917CA9 /* ViewController.h */,
@@ -74,7 +74,7 @@
 				2459FDDA1D83664300917CA9 /* Info.plist */,
 				2459FDC91D83664300917CA9 /* Supporting Files */,
 			);
-			path = ObjCVoiceCallKitQuickstart;
+			path = ObjCVoiceQuickstart;
 			sourceTree = "<group>";
 		};
 		2459FDC91D83664300917CA9 /* Supporting Files */ = {
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2459FDC51D83664300917CA9 /* ObjCVoiceCallKitQuickstart */ = {
+		2459FDC51D83664300917CA9 /* ObjCVoiceQuickstart */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2459FDDD1D83664300917CA9 /* Build configuration list for PBXNativeTarget "ObjCVoiceCallKitQuickstart" */;
+			buildConfigurationList = 2459FDDD1D83664300917CA9 /* Build configuration list for PBXNativeTarget "ObjCVoiceQuickstart" */;
 			buildPhases = (
 				2459FDC21D83664300917CA9 /* Sources */,
 				2459FDC31D83664300917CA9 /* Frameworks */,
@@ -107,9 +107,9 @@
 			);
 			dependencies = (
 			);
-			name = ObjCVoiceCallKitQuickstart;
-			productName = ObjCVoiceCallKitQuickstart;
-			productReference = 2459FDC61D83664300917CA9 /* ObjCVoiceCallKitQuickstart.app */;
+			name = ObjCVoiceQuickstart;
+			productName = ObjCVoiceQuickstart;
+			productReference = 2459FDC61D83664300917CA9 /* ObjCVoiceQuickstart.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -135,7 +135,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2459FDC11D83664300917CA9 /* Build configuration list for PBXProject "ObjCVoiceCallKitQuickstart" */;
+			buildConfigurationList = 2459FDC11D83664300917CA9 /* Build configuration list for PBXProject "ObjCVoiceQuickstart" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -148,7 +148,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2459FDC51D83664300917CA9 /* ObjCVoiceCallKitQuickstart */,
+				2459FDC51D83664300917CA9 /* ObjCVoiceQuickstart */,
 			);
 		};
 /* End PBXProject section */
@@ -294,11 +294,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = ObjCVoiceCallKitQuickstart/ObjCVoiceCallKitQuickstart.entitlements;
-				INFOPLIST_FILE = "$(SRCROOT)/ObjCVoiceCallKitQuickstart/Info.plist";
+				CODE_SIGN_ENTITLEMENTS = ObjCVoiceQuickstart/ObjCVoiceQuickstart.entitlements;
+				INFOPLIST_FILE = "$(SRCROOT)/ObjCVoiceQuickstart/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.twilio.ObjCVoiceCallKitQuickstart;
+				PRODUCT_BUNDLE_IDENTIFIER = com.twilio.ObjCVoiceQuickstart;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -307,11 +307,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = ObjCVoiceCallKitQuickstart/ObjCVoiceCallKitQuickstart.entitlements;
-				INFOPLIST_FILE = "$(SRCROOT)/ObjCVoiceCallKitQuickstart/Info.plist";
+				CODE_SIGN_ENTITLEMENTS = ObjCVoiceQuickstart/ObjCVoiceQuickstart.entitlements;
+				INFOPLIST_FILE = "$(SRCROOT)/ObjCVoiceQuickstart/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.twilio.ObjCVoiceCallKitQuickstart;
+				PRODUCT_BUNDLE_IDENTIFIER = com.twilio.ObjCVoiceQuickstart;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -319,7 +319,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2459FDC11D83664300917CA9 /* Build configuration list for PBXProject "ObjCVoiceCallKitQuickstart" */ = {
+		2459FDC11D83664300917CA9 /* Build configuration list for PBXProject "ObjCVoiceQuickstart" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2459FDDB1D83664300917CA9 /* Debug */,
@@ -328,7 +328,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2459FDDD1D83664300917CA9 /* Build configuration list for PBXNativeTarget "ObjCVoiceCallKitQuickstart" */ = {
+		2459FDDD1D83664300917CA9 /* Build configuration list for PBXNativeTarget "ObjCVoiceQuickstart" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2459FDDE1D83664300917CA9 /* Debug */,
