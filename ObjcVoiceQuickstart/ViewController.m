@@ -280,12 +280,23 @@ withCompletionHandler:(void (^)(void))completion {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
     }
-    
-    /**
-     * The Voice SDK processes the call notification and returns the call invite synchronously. Report the incoming call to
-     * CallKit and fulfill the completion before exiting this callback method.
-    */
-    completion();
+    if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){13, 0, 0}]){
+        /**
+        * The Voice SDK processes the call notification and returns the call invite synchronously. Report the incoming call to
+        * CallKit and fulfill the completion before exiting this callback method.
+        */
+        completion();
+    } else {
+        // Save for later when the notification is properly handled.
+        self.incomingPushCompletionCallback = completion;
+    }
+}
+
+- (void)incomingPushHandled {
+    if (self.incomingPushCompletionCallback) {
+        self.incomingPushCompletionCallback();
+        self.incomingPushCompletionCallback = nil;
+    }
 }
 
 #pragma mark - TVONotificationDelegate
@@ -300,9 +311,15 @@ withCompletionHandler:(void (^)(void))completion {
 
     if (self.callInvite) {
         NSLog(@"A CallInvite is already in progress. Ignoring the incoming CallInvite from %@", callInvite.from);
+        if (![[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){13, 0, 0}]){
+            [self incomingPushHandled];
+        }
         return;
     } else if (self.call) {
         NSLog(@"Already an active call. Ignoring the incoming CallInvite from %@", callInvite.from);
+        if (![[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){13, 0, 0}]){
+            [self incomingPushHandled];
+        }
         return;
     }
 
@@ -647,6 +664,10 @@ withCompletionHandler:(void (^)(void))completion {
     }
     
     self.callInvite = nil;
+    
+    if (![[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){13, 0, 0}]){
+        completion();
+    }
 }
 
 @end
