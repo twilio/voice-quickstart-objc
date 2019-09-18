@@ -1,6 +1,6 @@
 //
 //  ViewController.m
-//  Twilio Voice with CallKit Quickstart - Objective-C
+//  Twilio Voice with Quickstart - Objective-C
 //
 //  Copyright © 2016-2018 Twilio, Inc. All rights reserved.
 //
@@ -68,7 +68,7 @@ static NSString *const kTwimlParamTo = @"to";
 }
 
 - (void)configureCallKit {
-    CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"CallKit Quickstart"];
+    CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"Quickstart"];
     configuration.maximumCallGroups = 1;
     configuration.maximumCallsPerCallGroup = 1;
     UIImage *callkitIcon = [UIImage imageNamed:@"iconMask80"];
@@ -255,7 +255,7 @@ static NSString *const kTwimlParamTo = @"to";
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self delegateQueue:nil]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
     }
@@ -275,7 +275,7 @@ withCompletionHandler:(void (^)(void))completion {
     self.incomingPushCompletionCallback = completion;
 
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self delegateQueue:nil]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
     }
@@ -303,11 +303,15 @@ withCompletionHandler:(void (^)(void))completion {
     }
 
     self.callInvite = callInvite;
-
-    [self reportIncomingCallFrom:@"Voice Bot" withUUID:callInvite.uuid];
+    
+    NSString *from = @"Voice Bot";
+    if (callInvite.from) {
+        from = [callInvite.from stringByReplacingOccurrencesOfString:@"client:" withString:@""];
+    }
+    [self reportIncomingCallFrom:from withUUID:callInvite.uuid];
 }
 
-- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
+- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite error:(NSError *)error {
     NSLog(@"cancelledCallInviteReceived:");
     
     [self incomingPushHandled];
