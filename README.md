@@ -6,7 +6,7 @@
 
 ## Get started with Voice on iOS:
 * [Quickstart](#quickstart) - Run the quickstart app
-* [Migration Guide from 4.x to 5.x](https://github.com/twilio/voice-quickstart-objc/blob/master/Docs/migration-guide-3.x-4.x.md) - Migrating from 4.x to 5.x
+* [Migration Guide from 4.x to 5.x](https://github.com/twilio/twilio-voice-ios/blob/Releases/iOS-13-Migration-Guide.md) - Migrating from 4.x to 5.x
 * [4.0 New Features](https://github.com/twilio/voice-quickstart-objc/blob/master/Docs/new-features-4.0.md) - New features in 4.0
 * [Migration Guide from 3.x to 4.x](https://github.com/twilio/voice-quickstart-objc/blob/master/Docs/migration-guide-3.x-4.x.md) - Migrating from 3.x to 4.x
 * [3.0 New Features](https://github.com/twilio/voice-quickstart-objc/blob/master/Docs/new-features-3.0.md) - New features in 3.0
