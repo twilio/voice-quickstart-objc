@@ -255,6 +255,8 @@ static NSString *const kTwimlParamTo = @"to";
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
+        
+        // The Voice SDK will use main queue to invoke `cancelledCallInviteReceived:error` when delegate queue is not passed
         if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self delegateQueue:nil]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
@@ -276,6 +278,7 @@ withCompletionHandler:(void (^)(void))completion {
 
     
     if ([type isEqualToString:PKPushTypeVoIP]) {
+        // The Voice SDK will use main queue to invoke `cancelledCallInviteReceived:error` when delegate queue is not passed
         if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self delegateQueue:nil]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
