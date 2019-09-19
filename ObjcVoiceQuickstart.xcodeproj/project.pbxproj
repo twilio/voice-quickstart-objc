@@ -14,9 +14,6 @@
 		2459FDD61D83664300917CA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2459FDD51D83664300917CA9 /* Assets.xcassets */; };
 		2459FDD91D83664300917CA9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2459FDD71D83664300917CA9 /* LaunchScreen.storyboard */; };
 		24BA34291D87431000B0B4F7 /* TwilioLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 24BA34281D87431000B0B4F7 /* TwilioLogo.png */; };
-		8F1A927A1DF7E96700609990 /* disconnect.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8F1A92771DF7E96700609990 /* disconnect.wav */; };
-		8F1A927B1DF7E96700609990 /* incoming.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8F1A92781DF7E96700609990 /* incoming.wav */; };
-		8F1A927C1DF7E96700609990 /* outgoing.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8F1A92791DF7E96700609990 /* outgoing.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,9 +29,6 @@
 		2459FDDA1D83664300917CA9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		24BA34241D87269500B0B4F7 /* ObjCVoiceQuickstart.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ObjCVoiceQuickstart.entitlements; sourceTree = "<group>"; };
 		24BA34281D87431000B0B4F7 /* TwilioLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TwilioLogo.png; sourceTree = "<group>"; };
-		8F1A92771DF7E96700609990 /* disconnect.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = disconnect.wav; sourceTree = "<group>"; };
-		8F1A92781DF7E96700609990 /* incoming.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = incoming.wav; sourceTree = "<group>"; };
-		8F1A92791DF7E96700609990 /* outgoing.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = outgoing.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,7 +46,6 @@
 			isa = PBXGroup;
 			children = (
 				2459FDC81D83664300917CA9 /* ObjCVoiceQuickstart */,
-				8F1A92761DF7E96700609990 /* Ringtones */,
 				2459FDC71D83664300917CA9 /* Products */,
 				5FF12A4D246637936B670360 /* Frameworks */,
 			);
@@ -97,16 +90,6 @@
 			children = (
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		8F1A92761DF7E96700609990 /* Ringtones */ = {
-			isa = PBXGroup;
-			children = (
-				8F1A92771DF7E96700609990 /* disconnect.wav */,
-				8F1A92781DF7E96700609990 /* incoming.wav */,
-				8F1A92791DF7E96700609990 /* outgoing.wav */,
-			);
-			path = Ringtones;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -176,12 +159,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				2459FDD91D83664300917CA9 /* LaunchScreen.storyboard in Resources */,
-				8F1A927C1DF7E96700609990 /* outgoing.wav in Resources */,
 				2459FDD61D83664300917CA9 /* Assets.xcassets in Resources */,
 				24BA34291D87431000B0B4F7 /* TwilioLogo.png in Resources */,
 				2459FDD41D83664300917CA9 /* Main.storyboard in Resources */,
-				8F1A927B1DF7E96700609990 /* incoming.wav in Resources */,
-				8F1A927A1DF7E96700609990 /* disconnect.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,7 +295,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = ObjCVoiceQuickstart/ObjCVoiceQuickstart.entitlements;
-				INFOPLIST_FILE = ObjCVoiceQuickstart/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/ObjCVoiceQuickstart/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.twilio.ObjCVoiceQuickstart;
@@ -328,7 +308,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = ObjCVoiceQuickstart/ObjCVoiceQuickstart.entitlements;
-				INFOPLIST_FILE = ObjCVoiceQuickstart/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/ObjCVoiceQuickstart/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.twilio.ObjCVoiceQuickstart;

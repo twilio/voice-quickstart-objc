@@ -1,6 +1,6 @@
 //
 //  ViewController.m
-//  Twilio Voice with CallKit Quickstart - Objective-C
+//  Twilio Voice with Quickstart - Objective-C
 //
 //  Copyright © 2016-2018 Twilio, Inc. All rights reserved.
 //
@@ -68,7 +68,7 @@ static NSString *const kTwimlParamTo = @"to";
 }
 
 - (void)configureCallKit {
-    CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"CallKit Quickstart"];
+    CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"Quickstart"];
     configuration.maximumCallGroups = 1;
     configuration.maximumCallsPerCallGroup = 1;
     UIImage *callkitIcon = [UIImage imageNamed:@"iconMask80"];
@@ -255,7 +255,7 @@ static NSString *const kTwimlParamTo = @"to";
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"pushRegistry:didReceiveIncomingPushWithPayload:forType:");
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self delegateQueue:nil]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
     }
@@ -274,10 +274,21 @@ withCompletionHandler:(void (^)(void))completion {
     // Save for later when the notification is properly handled.
     self.incomingPushCompletionCallback = completion;
 
+    
     if ([type isEqualToString:PKPushTypeVoIP]) {
-        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self]) {
+        if (![TwilioVoice handleNotification:payload.dictionaryPayload delegate:self delegateQueue:nil]) {
             NSLog(@"This is not a valid Twilio Voice notification.");
         }
+    }
+    if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 13) {
+        // Save for later when the notification is properly handled.
+        self.incomingPushCompletionCallback = completion;
+    } else {
+        /**
+        * The Voice SDK processes the call notification and returns the call invite synchronously. Report the incoming call to
+        * CallKit and fulfill the completion before exiting this callback method.
+        */
+        completion();
     }
 }
 
@@ -290,27 +301,46 @@ withCompletionHandler:(void (^)(void))completion {
 
 #pragma mark - TVONotificationDelegate
 - (void)callInviteReceived:(TVOCallInvite *)callInvite {
-    NSLog(@"callInviteReceived:");
     
+    /**
+     * Calling `[TwilioVoice handleNotification:delegate:]` will synchronously process your notification payload and
+     * provide you a `TVOCallInvite` object. Report the incoming call to CallKit upon receiving this callback.
+     */
+
+    NSLog(@"callInviteReceived:");
+
     if (self.callInvite) {
         NSLog(@"A CallInvite is already in progress. Ignoring the incoming CallInvite from %@", callInvite.from);
-        [self incomingPushHandled];
+        if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 13) {
+            [self incomingPushHandled];
+        }
         return;
     } else if (self.call) {
         NSLog(@"Already an active call. Ignoring the incoming CallInvite from %@", callInvite.from);
-        [self incomingPushHandled];
+        if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 13) {
+            [self incomingPushHandled];
+        }
         return;
     }
 
     self.callInvite = callInvite;
-
-    [self reportIncomingCallFrom:@"Voice Bot" withUUID:callInvite.uuid];
+    
+    NSString *from = @"Voice Bot";
+    if (callInvite.from) {
+        from = [callInvite.from stringByReplacingOccurrencesOfString:@"client:" withString:@""];
+    }
+    [self reportIncomingCallFrom:from withUUID:callInvite.uuid];
 }
 
-- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite {
-    NSLog(@"cancelledCallInviteReceived:");
+- (void)cancelledCallInviteReceived:(TVOCancelledCallInvite *)cancelledCallInvite error:(NSError *)error {
     
-    [self incomingPushHandled];
+    /**
+     * The SDK may call `[TVONotificationDelegate callInviteReceived:error:]` asynchronously on the dispatch queue
+     * with a `TVOCancelledCallInvite` if the caller hangs up or the client encounters any other error before the called
+     * party could answer or reject the call.
+     */
+    
+    NSLog(@"cancelledCallInviteReceived:");
     
     if (!self.callInvite ||
         ![self.callInvite.callSid isEqualToString:cancelledCallInvite.callSid]) {
@@ -321,7 +351,6 @@ withCompletionHandler:(void (^)(void))completion {
     [self performEndCallActionWithUUID:self.callInvite.uuid];
 
     self.callInvite = nil;
-    [self incomingPushHandled];
 }
 
 #pragma mark - TVOCallDelegate
@@ -635,7 +664,10 @@ withCompletionHandler:(void (^)(void))completion {
     }
     
     self.callInvite = nil;
-    [self incomingPushHandled];
+    
+    if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 13) {
+        [self incomingPushHandled];
+    }
 }
 
 @end
