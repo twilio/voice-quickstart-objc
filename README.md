@@ -84,9 +84,9 @@ Download one of the starter projects for the server.
 
 Follow the instructions in the server's README to get the application server up and running locally and accessible via the public Internet. For now just replace the **Twilio Account SID** that you can obtain from the [console](https://www.twilio.com/console), and the `API_KEY` and `API_SECRET` you obtained in the previous step.
     
-    ACCOUNT_SID = 'AC***'
-    API_KEY = 'SK***'
-    API_KEY_SECRET = '***'
+    ACCOUNT_SID=AC12345678901234567890123456789012
+    API_KEY=SK12345678901234567890123456789012
+    API_KEY_SECRET=the_secret_generated_when_creating_the_api_key
 
 ### <a name="bullet4"></a>4. Create a TwiML application
 Next, we need to create a TwiML application. A TwiML application identifies a public URL for retrieving [TwiML call control instructions](https://www.twilio.com/docs/api/twiml). When your iOS app makes a call to the Twilio cloud, Twilio will make a webhook request to this URL, your application server will respond with generated TwiML, and Twilio will execute the instructions you’ve provided.
@@ -100,10 +100,10 @@ Save your TwiML Application configuration, and grab the **TwiML Application SID*
 ### <a name="bullet5"></a>5. Configure your application server
 Let's put the remaining `APP_SID` configuration info into your server code 
 
-    ACCOUNT_SID = 'AC***'
-    API_KEY = 'SK***'
-    API_KEY_SECRET = '***'
-    APP_SID = 'AP***'
+    ACCOUNT_SID=AC12345678901234567890123456789012
+    API_KEY=SK12345678901234567890123456789012
+    API_KEY_SECRET=the_secret_generated_when_creating_the_api_key
+    APP_SID=AP12345678901234567890123456789012
 
 Once you’ve done that, restart the server so it uses the new configuration info. Now it's time to test.
 
@@ -167,7 +167,7 @@ Once the app is ready for store submission, update the plist with “APS Environ
 
 Now let's go back to your server code and update the Push Credential SID. The Push Credential SID will now be embedded in your access token.
 
-    PUSH_CREDENTIAL_SID = 'CR***'
+    PUSH_CREDENTIAL_SID=CR12345678901234567890123456789012
 
 ### <a name="bullet9"></a>9. Configure Xcode project settings for push notifications
 On the project’s Capabilities tab, enable “**Push Notifications**”.
@@ -205,7 +205,7 @@ Use the text field to specify the identity of the call receiver, then tap the �
 ### <a name="bullet12"></a>12. Make client to PSTN call
 A verified phone number is one that you can use as your Caller ID when making outbound calls with Twilio. This number has not been ported into Twilio and you do not pay Twilio for this phone number.
 
-To make client to number calls, first get a valid Twilio number to your account via https://www.twilio.com/console/phone-numbers/verified. Update your server code and replace `CALLER_NUMBER` with the verified number. Restart the server so it uses the new value. Voice Request URL of your TwiML application should point to the public URL of your application server’s `/makeCall` endpoint.
+To make client to number calls, first get a valid Twilio number to your account via https://www.twilio.com/console/phone-numbers/verified. Update your server code and replace the caller number variable  (`CALLER_NUMBER` or `callerNumber` depending on which server you chose) with the verified number. Restart the server so that it uses the new value. Voice Request URL of your TwiML application should point to the public URL of your application server’s `/makeCall` endpoint.
 
 <kbd><img height="667px" src="Images/client-to-pstn.png"/></kbd>
 
