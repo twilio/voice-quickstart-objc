@@ -26,8 +26,11 @@ static NSString *const kTwimlParamTo = @"to";
 @property (nonatomic, strong) void(^incomingPushCompletionCallback)(void);
 @property (nonatomic, strong) void(^callKitCompletionCallback)(BOOL);
 @property (nonatomic, strong) TVODefaultAudioDevice *audioDevice;
-@property (nonatomic, strong) NSMutableSet *activeCallInvites;
-@property (nonatomic, strong) NSMutableArray *activeCalls;
+@property (nonatomic, strong) NSMutableDictionary *activeCallInvites;
+@property (nonatomic, strong) NSMutableDictionary *activeCalls;
+
+// activeCall represents the last connected call
+@property (nonatomic, strong) TVOCall *activeCall;
 
 @property (nonatomic, strong) CXProvider *callKitProvider;
 @property (nonatomic, strong) CXCallController *callKitCallController;
@@ -66,8 +69,8 @@ static NSString *const kTwimlParamTo = @"to";
     self.audioDevice = [TVODefaultAudioDevice audioDevice];
     TwilioVoice.audioDevice = self.audioDevice;
     
-    self.activeCallInvites = [NSMutableSet set];
-    self.activeCalls = [NSMutableArray array];
+    self.activeCallInvites = [NSMutableDictionary dictionary];
+    self.activeCalls = [NSMutableDictionary dictionary];
 }
 
 - (void)configureCallKit {
@@ -103,14 +106,11 @@ static NSString *const kTwimlParamTo = @"to";
     return accessToken;
 }
 
-- (IBAction)placeCall:(id)sender {
-    if ([self.activeCalls count]) {
-        TVOCall *call = self.activeCalls[0];
-        if (call.state == TVOCallStateConnected) {
-            self.userInitiatedDisconnect = YES;
-            [self performEndCallActionWithUUID:call.uuid];
-            [self toggleUIState:NO showCallControl:NO];
-        }
+- (IBAction)mainButtonPressed:(id)sender {
+    if (self.activeCall != nil) {
+        self.userInitiatedDisconnect = YES;
+        [self performEndCallActionWithUUID:self.activeCall.uuid];
+        [self toggleUIState:NO showCallControl:NO];
     } else {
         NSUUID *uuid = [NSUUID UUID];
         NSString *handle = @"Voice Bot";
@@ -195,9 +195,9 @@ static NSString *const kTwimlParamTo = @"to";
 }
 
 - (IBAction)muteSwitchToggled:(UISwitch *)sender {
-    if ([self.activeCalls count] > 0) {
-        TVOCall *call = self.activeCalls[0];
-        call.muted = sender.on;
+    // The sample app supports toggling mute from app UI only on the last connected call.
+    if (self.activeCall != nil) {
+        self.activeCall.muted = sender.on;
     }
 }
 
@@ -328,7 +328,7 @@ withCompletionHandler:(void (^)(void))completion {
     
     // Always report to CallKit
     [self reportIncomingCallFrom:from withUUID:callInvite.uuid];
-    [self.activeCallInvites addObject:callInvite];
+    self.activeCallInvites[[callInvite.uuid UUIDString]] = callInvite;
     if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 13) {
         [self incomingPushHandled];
     }
@@ -344,7 +344,7 @@ withCompletionHandler:(void (^)(void))completion {
     
     NSLog(@"cancelledCallInviteReceived:");
     
-    __block TVOCallInvite *callInvite;
+    TVOCallInvite *callInvite;
     for (TVOCallInvite *invite in self.activeCallInvites) {
         if ([cancelledCallInvite.callSid isEqualToString:invite.callSid]) {
             callInvite = invite;
@@ -418,7 +418,10 @@ withCompletionHandler:(void (^)(void))completion {
 }
 
 - (void)callDisconnected:(TVOCall *)call {
-    [self.activeCalls removeObject:call];
+    if ([call isEqual:self.activeCall]) {
+        self.activeCall = nil;
+    }
+    [self.activeCalls removeObjectForKey:call.uuid.UUIDString];
     
     self.userInitiatedDisconnect = NO;
     
@@ -550,12 +553,12 @@ withCompletionHandler:(void (^)(void))completion {
 - (void)provider:(CXProvider *)provider performEndCallAction:(CXEndCallAction *)action {
     NSLog(@"provider:performEndCallAction:");
     
-    TVOCallInvite *callInvite = [self callInviteWithUUID:action.callUUID];
-    TVOCall *call = [self callWithUUID:action.callUUID];
+    TVOCallInvite *callInvite = self.activeCallInvites[action.callUUID.UUIDString];
+    TVOCall *call = self.activeCalls[action.callUUID.UUIDString];
 
     if (callInvite) {
         [callInvite reject];
-        [self.activeCallInvites removeObject:callInvite];
+        [self.activeCallInvites removeObjectForKey:callInvite.uuid.UUIDString];
     } else if (call) {
         [call disconnect];
     } else {
@@ -567,7 +570,7 @@ withCompletionHandler:(void (^)(void))completion {
 }
 
 - (void)provider:(CXProvider *)provider performSetHeldCallAction:(CXSetHeldCallAction *)action {
-    TVOCall *call = [self callWithUUID:action.callUUID];
+    TVOCall *call = self.activeCalls[action.callUUID.UUIDString];
     if (call && call.state == TVOCallStateConnected) {
         [call setOnHold:action.isOnHold];
         [action fulfill];
@@ -651,14 +654,15 @@ withCompletionHandler:(void (^)(void))completion {
     }];
     TVOCall *call = [TwilioVoice connectWithOptions:connectOptions delegate:self];
     if (call) {
-        [self.activeCalls addObject:call];
+        self.activeCall = call;
+        self.activeCalls[call.uuid.UUIDString] = call;
     }
     self.callKitCompletionCallback = completionHandler;
 }
 
 - (void)performAnswerVoiceCallWithUUID:(NSUUID *)uuid
                             completion:(void(^)(BOOL success))completionHandler {
-    TVOCallInvite *callInvite = [self callInviteWithUUID:uuid];
+    TVOCallInvite *callInvite = self.activeCallInvites[uuid.UUIDString];
     NSAssert(callInvite, @"No CallInvite matches the UUID");
     
     TVOAcceptOptions *acceptOptions = [TVOAcceptOptions optionsWithCallInvite:callInvite block:^(TVOAcceptOptionsBuilder *builder) {
@@ -671,32 +675,15 @@ withCompletionHandler:(void (^)(void))completion {
         completionHandler(NO);
     } else {
         self.callKitCompletionCallback = completionHandler;
-        [self.activeCalls addObject:call];
+        self.activeCall = call;
+        self.activeCalls[call.uuid.UUIDString] = call;
     }
 
-    [self.activeCallInvites removeObject:callInvite];
+    [self.activeCallInvites removeObjectForKey:callInvite.uuid.UUIDString];
     
     if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 13) {
         [self incomingPushHandled];
     }
-}
-
-- (TVOCallInvite *)callInviteWithUUID:(NSUUID *)uuid {
-    for (TVOCallInvite *invite in self.activeCallInvites) {
-        if ([invite.uuid isEqual:uuid]) {
-            return invite;
-        }
-    }
-    return nil;
-}
-
-- (TVOCall *)callWithUUID:(NSUUID *)uuid {
-    for (TVOCall *call in self.activeCalls) {
-        if ([call.uuid isEqual:uuid]) {
-            return call;
-        }
-    }
-    return nil;
 }
 
 @end
