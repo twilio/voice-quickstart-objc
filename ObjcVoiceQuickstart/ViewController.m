@@ -18,7 +18,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 static NSString *const kIdentity = @"alice";
 static NSString *const kTwimlParamTo = @"to";
 
-@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, CXProviderDelegate, UITextFieldDelegate>
+@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, CXProviderDelegate, UITextFieldDelegate, AVAudioPlayerDelegate>
 
 @property (nonatomic, strong) NSString *deviceTokenString;
 
@@ -44,6 +44,9 @@ static NSString *const kTwimlParamTo = @"to";
 @property (weak, nonatomic) IBOutlet UIView *callControlView;
 @property (weak, nonatomic) IBOutlet UISwitch *muteSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *speakerSwitch;
+
+@property (nonatomic, assign) BOOL answerOnBridgeEnabled;
+@property (nonatomic, strong) AVAudioPlayer *ringtonePlayer;
 
 @end
 
@@ -71,6 +74,12 @@ static NSString *const kTwimlParamTo = @"to";
     
     self.activeCallInvites = [NSMutableDictionary dictionary];
     self.activeCalls = [NSMutableDictionary dictionary];
+    
+    /*
+     Configure this flag based on the TwiML application. Custom ringtone will be played when this
+     flag is enabled.
+     */
+    self.answerOnBridgeEnabled = NO;
 }
 
 - (void)configureCallKit {
@@ -361,11 +370,23 @@ withCompletionHandler:(void (^)(void))completion {
 - (void)callDidStartRinging:(TVOCall *)call {
     NSLog(@"callDidStartRinging:");
     
+    /*
+     When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge) is enabled in the
+     <Dial> TwiML verb, the caller will not hear the ringtone while the call is ringing and awaiting to be
+     accepted on the callee's side. The application can use the `AVAudioPlayer` to play custom audio files
+     between the `[TVOCallDelegate callDidStartRinging:]` and the `[TVOCallDelegate callDidConnect:]` callbacks.
+     */
+    if (self.answerOnBridgeEnabled) {
+        [self playRingtone];
+    }
+    
     [self.placeCallButton setTitle:@"Ringing" forState:UIControlStateNormal];
 }
 
 - (void)callDidConnect:(TVOCall *)call {
     NSLog(@"callDidConnect:");
+    
+    [self stopRingtone];
 
     self.callKitCompletionCallback(YES);
     
@@ -424,6 +445,8 @@ withCompletionHandler:(void (^)(void))completion {
     [self.activeCalls removeObjectForKey:call.uuid.UUIDString];
     
     self.userInitiatedDisconnect = NO;
+    
+    [self stopRingtone];
     
     [self stopSpin];
     [self toggleUIState:YES showCallControl:NO];
@@ -683,6 +706,48 @@ withCompletionHandler:(void (^)(void))completion {
     
     if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 13) {
         [self incomingPushHandled];
+    }
+}
+
+#pragma mark - Ringtone
+
+- (void)playRingtone {
+    NSString *ringtonePath = [[NSBundle mainBundle] pathForResource:@"ringtone" ofType:@"wav"];
+    if ([ringtonePath length] <= 0) {
+        NSLog(@"Can't find sound file");
+        return;
+    }
+    
+    self.ringtonePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:ringtonePath] error:nil];
+    self.ringtonePlayer.delegate = self;
+    self.ringtonePlayer.numberOfLoops = -1;
+    
+    [self play];
+}
+
+- (void)stopRingtone {
+    if (!self.ringtonePlayer.isPlaying) {
+        return;
+    }
+    
+    [self.ringtonePlayer stop];
+    NSError *error = nil;
+    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
+                                                error:&error]) {
+        NSLog(@"Failed to reset AVAudioSession category: %@", [error localizedDescription]);
+    }
+}
+
+- (void)play {
+    self.ringtonePlayer.volume = 1.0f;
+    [self.ringtonePlayer play];
+}
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
+    NSError *error = nil;
+    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
+                                                error:&error]) {
+        NSLog(@"Unable to reset AVAudioSession category: %@", [error localizedDescription]);
     }
 }
 
