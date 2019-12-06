@@ -76,7 +76,7 @@ static NSString *const kTwimlParamTo = @"to";
     self.activeCalls = [NSMutableDictionary dictionary];
     
     /*
-     Configure this flag based on the TwiML application. Custom ringtone will be played when this
+     Configure this flag based on the TwiML application. Custom ringback will be played when this
      flag is enabled.
      */
     self.answerOnBridgeEnabled = NO;
@@ -372,12 +372,12 @@ withCompletionHandler:(void (^)(void))completion {
     
     /*
      When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge) is enabled in the
-     <Dial> TwiML verb, the caller will not hear the ringtone while the call is ringing and awaiting to be
+     <Dial> TwiML verb, the caller will not hear the ringback while the call is ringing and awaiting to be
      accepted on the callee's side. The application can use the `AVAudioPlayer` to play custom audio files
      between the `[TVOCallDelegate callDidStartRinging:]` and the `[TVOCallDelegate callDidConnect:]` callbacks.
      */
     if (self.answerOnBridgeEnabled) {
-        [self playRingtone];
+        [self playRingback];
     }
     
     [self.placeCallButton setTitle:@"Ringing" forState:UIControlStateNormal];
@@ -386,7 +386,9 @@ withCompletionHandler:(void (^)(void))completion {
 - (void)callDidConnect:(TVOCall *)call {
     NSLog(@"callDidConnect:");
     
-    [self stopRingtone];
+    if (self.answerOnBridgeEnabled) {
+        [self stopRingback];
+    }
 
     self.callKitCompletionCallback(YES);
     
@@ -446,7 +448,9 @@ withCompletionHandler:(void (^)(void))completion {
     
     self.userInitiatedDisconnect = NO;
     
-    [self stopRingtone];
+    if (self.answerOnBridgeEnabled) {
+        [self stopRingback];
+    }
     
     [self stopSpin];
     [self toggleUIState:YES showCallControl:NO];
@@ -711,44 +715,44 @@ withCompletionHandler:(void (^)(void))completion {
 
 #pragma mark - Ringtone
 
-- (void)playRingtone {
+- (void)playRingback {
     NSString *ringtonePath = [[NSBundle mainBundle] pathForResource:@"ringtone" ofType:@"wav"];
     if ([ringtonePath length] <= 0) {
         NSLog(@"Can't find sound file");
         return;
     }
     
-    self.ringtonePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:ringtonePath] error:nil];
-    self.ringtonePlayer.delegate = self;
-    self.ringtonePlayer.numberOfLoops = -1;
-    
-    [self play];
+    NSError *error;
+    self.ringtonePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:ringtonePath] error:&error];
+    if (error != nil) {
+        NSLog(@"Failed to initialize audio player: %@", error);
+    } else {
+        self.ringtonePlayer.delegate = self;
+        self.ringtonePlayer.numberOfLoops = -1;
+        
+        self.ringtonePlayer.volume = 1.0f;
+        [self.ringtonePlayer play];
+    }
 }
 
-- (void)stopRingtone {
+- (void)stopRingback {
     if (!self.ringtonePlayer.isPlaying) {
         return;
     }
     
     [self.ringtonePlayer stop];
-    NSError *error = nil;
-    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
-                                                error:&error]) {
-        NSLog(@"Failed to reset AVAudioSession category: %@", [error localizedDescription]);
-    }
-}
-
-- (void)play {
-    self.ringtonePlayer.volume = 1.0f;
-    [self.ringtonePlayer play];
 }
 
 - (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
-    NSError *error = nil;
-    if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
-                                                error:&error]) {
-        NSLog(@"Unable to reset AVAudioSession category: %@", [error localizedDescription]);
+    if (flag) {
+        NSLog(@"Audio player finished playing successfully");
+    } else {
+        NSLog(@"Something wrong with audio player playback");
     }
+}
+
+- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError *)error {
+    NSLog(@"Decode error occurred: %@", error);
 }
 
 @end
