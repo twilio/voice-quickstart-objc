@@ -45,7 +45,7 @@ static NSString *const kTwimlParamTo = @"to";
 @property (weak, nonatomic) IBOutlet UISwitch *muteSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *speakerSwitch;
 
-@property (nonatomic, assign) BOOL answerOnBridgeEnabled;
+@property (nonatomic, assign) BOOL playCustomRingback;
 @property (nonatomic, strong) AVAudioPlayer *ringtonePlayer;
 
 @end
@@ -76,8 +76,10 @@ static NSString *const kTwimlParamTo = @"to";
     self.activeCalls = [NSMutableDictionary dictionary];
     
     /*
-     Configure this flag based on the TwiML application. Custom ringback will be played when this
-     flag is enabled.
+     Custom ringback will be played when this flag is enabled.
+     When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge) is enabled in
+     the <Dial> TwiML verb, the caller will not hear the ringback while the call is ringing and awaiting
+     to be accepted on the callee's side. Configure this flag based on the TwiML application.
      */
     self.answerOnBridgeEnabled = NO;
 }
@@ -376,7 +378,7 @@ withCompletionHandler:(void (^)(void))completion {
      accepted on the callee's side. The application can use the `AVAudioPlayer` to play custom audio files
      between the `[TVOCallDelegate callDidStartRinging:]` and the `[TVOCallDelegate callDidConnect:]` callbacks.
      */
-    if (self.answerOnBridgeEnabled) {
+    if (self.playCustomRingback) {
         [self playRingback];
     }
     
@@ -386,7 +388,7 @@ withCompletionHandler:(void (^)(void))completion {
 - (void)callDidConnect:(TVOCall *)call {
     NSLog(@"callDidConnect:");
     
-    if (self.answerOnBridgeEnabled) {
+    if (self.playCustomRingback) {
         [self stopRingback];
     }
 
@@ -448,7 +450,7 @@ withCompletionHandler:(void (^)(void))completion {
     
     self.userInitiatedDisconnect = NO;
     
-    if (self.answerOnBridgeEnabled) {
+    if (self.playCustomRingback) {
         [self stopRingback];
     }
     
