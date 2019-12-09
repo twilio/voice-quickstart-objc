@@ -749,7 +749,7 @@ withCompletionHandler:(void (^)(void))completion {
     if (flag) {
         NSLog(@"Audio player finished playing successfully");
     } else {
-        NSLog(@"Something wrong with audio player playback");
+        NSLog(@"Audio player finished playing with some error");
     }
 }
 
