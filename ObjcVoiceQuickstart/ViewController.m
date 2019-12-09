@@ -18,7 +18,7 @@ static NSString *const kAccessTokenEndpoint = @"/accessToken";
 static NSString *const kIdentity = @"alice";
 static NSString *const kTwimlParamTo = @"to";
 
-@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, CXProviderDelegate, UITextFieldDelegate>
+@interface ViewController () <PKPushRegistryDelegate, TVONotificationDelegate, TVOCallDelegate, CXProviderDelegate, UITextFieldDelegate, AVAudioPlayerDelegate>
 
 @property (nonatomic, strong) NSString *deviceTokenString;
 
@@ -44,6 +44,9 @@ static NSString *const kTwimlParamTo = @"to";
 @property (weak, nonatomic) IBOutlet UIView *callControlView;
 @property (weak, nonatomic) IBOutlet UISwitch *muteSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *speakerSwitch;
+
+@property (nonatomic, assign) BOOL playCustomRingback;
+@property (nonatomic, strong) AVAudioPlayer *ringtonePlayer;
 
 @end
 
@@ -71,6 +74,14 @@ static NSString *const kTwimlParamTo = @"to";
     
     self.activeCallInvites = [NSMutableDictionary dictionary];
     self.activeCalls = [NSMutableDictionary dictionary];
+    
+    /*
+     Custom ringback will be played when this flag is enabled.
+     When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge) is enabled in
+     the <Dial> TwiML verb, the caller will not hear the ringback while the call is ringing and awaiting
+     to be accepted on the callee's side. Configure this flag based on the TwiML application.
+     */
+    self.playCustomRingback = NO;
 }
 
 - (void)configureCallKit {
@@ -361,11 +372,25 @@ withCompletionHandler:(void (^)(void))completion {
 - (void)callDidStartRinging:(TVOCall *)call {
     NSLog(@"callDidStartRinging:");
     
+    /*
+     When [answerOnBridge](https://www.twilio.com/docs/voice/twiml/dial#answeronbridge) is enabled in the
+     <Dial> TwiML verb, the caller will not hear the ringback while the call is ringing and awaiting to be
+     accepted on the callee's side. The application can use the `AVAudioPlayer` to play custom audio files
+     between the `[TVOCallDelegate callDidStartRinging:]` and the `[TVOCallDelegate callDidConnect:]` callbacks.
+     */
+    if (self.playCustomRingback) {
+        [self playRingback];
+    }
+    
     [self.placeCallButton setTitle:@"Ringing" forState:UIControlStateNormal];
 }
 
 - (void)callDidConnect:(TVOCall *)call {
     NSLog(@"callDidConnect:");
+    
+    if (self.playCustomRingback) {
+        [self stopRingback];
+    }
 
     self.callKitCompletionCallback(YES);
     
@@ -424,6 +449,10 @@ withCompletionHandler:(void (^)(void))completion {
     [self.activeCalls removeObjectForKey:call.uuid.UUIDString];
     
     self.userInitiatedDisconnect = NO;
+    
+    if (self.playCustomRingback) {
+        [self stopRingback];
+    }
     
     [self stopSpin];
     [self toggleUIState:YES showCallControl:NO];
@@ -684,6 +713,48 @@ withCompletionHandler:(void (^)(void))completion {
     if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion < 13) {
         [self incomingPushHandled];
     }
+}
+
+#pragma mark - Ringtone
+
+- (void)playRingback {
+    NSString *ringtonePath = [[NSBundle mainBundle] pathForResource:@"ringtone" ofType:@"wav"];
+    if ([ringtonePath length] <= 0) {
+        NSLog(@"Can't find sound file");
+        return;
+    }
+    
+    NSError *error;
+    self.ringtonePlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:ringtonePath] error:&error];
+    if (error != nil) {
+        NSLog(@"Failed to initialize audio player: %@", error);
+    } else {
+        self.ringtonePlayer.delegate = self;
+        self.ringtonePlayer.numberOfLoops = -1;
+        
+        self.ringtonePlayer.volume = 1.0f;
+        [self.ringtonePlayer play];
+    }
+}
+
+- (void)stopRingback {
+    if (!self.ringtonePlayer.isPlaying) {
+        return;
+    }
+    
+    [self.ringtonePlayer stop];
+}
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
+    if (flag) {
+        NSLog(@"Audio player finished playing successfully");
+    } else {
+        NSLog(@"Audio player finished playing with some error");
+    }
+}
+
+- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError *)error {
+    NSLog(@"Decode error occurred: %@", error);
 }
 
 @end
