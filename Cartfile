@@ -1,2 +1,1 @@
-github "twilio/twilio-voice-ios" >= 5.1.0
-
+binary "https://raw.githubusercontent.com/twilio/twilio-voice-ios/fix-carthage/twilio-voice-ios.json"
