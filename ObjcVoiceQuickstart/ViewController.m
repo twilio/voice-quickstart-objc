@@ -81,7 +81,7 @@ static NSString *const kTwimlParamTo = @"to";
      the <Dial> TwiML verb, the caller will not hear the ringback while the call is ringing and awaiting
      to be accepted on the callee's side. Configure this flag based on the TwiML application.
      */
-    self.answerOnBridgeEnabled = NO;
+    self.playCustomRingback = NO;
 }
 
 - (void)configureCallKit {
