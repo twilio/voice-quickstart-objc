@@ -608,6 +608,16 @@ withCompletionHandler:(void (^)(void))completion {
     }
 }
 
+- (void)provider:(CXProvider *)provider performSetMutedCallAction:(CXSetMutedCallAction *)action {
+    TVOCall *call = self.activeCalls[action.callUUID.UUIDString];
+    if (call && call.state == TVOCallStateConnected) {
+        [call setMuted:action.isMuted];
+        [action fulfill];
+    } else {
+        [action fail];
+    }
+}
+
 #pragma mark - CallKit Actions
 - (void)performStartCallActionWithUUID:(NSUUID *)uuid handle:(NSString *)handle {
     if (uuid == nil || handle == nil) {
