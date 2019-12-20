@@ -600,7 +600,7 @@ withCompletionHandler:(void (^)(void))completion {
 
 - (void)provider:(CXProvider *)provider performSetHeldCallAction:(CXSetHeldCallAction *)action {
     TVOCall *call = self.activeCalls[action.callUUID.UUIDString];
-    if (call && call.state == TVOCallStateConnected) {
+    if (call) {
         [call setOnHold:action.isOnHold];
         [action fulfill];
     } else {
@@ -610,7 +610,7 @@ withCompletionHandler:(void (^)(void))completion {
 
 - (void)provider:(CXProvider *)provider performSetMutedCallAction:(CXSetMutedCallAction *)action {
     TVOCall *call = self.activeCalls[action.callUUID.UUIDString];
-    if (call && call.state == TVOCallStateConnected) {
+    if (call) {
         [call setMuted:action.isMuted];
         [action fulfill];
     } else {
