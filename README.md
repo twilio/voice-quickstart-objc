@@ -1,5 +1,9 @@
 ## Twilio Voice Objective-C Quickstart for iOS
 
+> **Deprecation Notice - voice-quickstart-objc repository**
+>
+> This repository has been deprecated and will no longer be maintained. All Objective-C examples have been merged into the [voice-quickstart-ios](https://github.com/twilio/voice-quickstart-ios) repository and will continue to be maintained there.
+
 > NOTE: These sample applications use the Twilio Voice 5.x APIs. For examples using our 2.x APIs, please see the [2.x](https://github.com/twilio/voice-quickstart-objc/tree/2.x) branch. If you are using SDK 2.x, we highly recommend planning your migration to 5.0 as soon as possible. Support for 2.x will cease 1/1/2020. Until then, SDK 2.x will only receive fixes for critical or security related issues.
 
 > Please see our [iOS 13 Migration Guide](https://github.com/twilio/twilio-voice-ios/blob/Releases/iOS-13-Migration-Guide.md) for the latest information on iOS 13.
